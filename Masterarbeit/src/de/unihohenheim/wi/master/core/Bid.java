@@ -5,12 +5,29 @@ import java.util.Map;
 
 public class Bid {
 
+  private int id;
+
+  private long maxLateness = 0;
+
+  private static int idCounter = 0;
+
   /** Delivery -> offered time */
   private Map<Delivery, Long> bidSet;
 
 
   public Bid(Map<Delivery, Long> bidmap) {
     bidSet = bidmap;
+    id = idCounter;
+    idCounter++;
+
+    if (bidSet != null && !bidSet.isEmpty()) {
+      maxLateness = 0;
+      for (Long value : bidSet.values()) {
+        if (Math.abs(value) > maxLateness) {
+          maxLateness = Math.abs(value);
+        }
+      }
+    }
   }
 
   /**
@@ -20,11 +37,12 @@ public class Bid {
     return bidSet;
   }
 
+
   /**
-   * @param bidSet the bidSet to set
+   * @return the maxLateness
    */
-  public void setBidSet(Map<Delivery, Long> bidSet) {
-    this.bidSet = bidSet;
+  public long getMaxLateness() {
+    return maxLateness;
   }
 
   /*
@@ -34,7 +52,7 @@ public class Bid {
    */
   @Override
   public String toString() {
-    return "Bid [bidSet=" + bidSet + "]";
+    return "Bid [id=" + id + ", maxLateness=" + maxLateness + ", bidSet=" + bidSet + "]";
   }
 
 

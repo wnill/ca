@@ -1,9 +1,12 @@
 package de.unihohenheim.wi.master.core;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Test;
 
@@ -14,14 +17,14 @@ public class TruckTest {
   public void testBlockerAtTheEnd() {
     Truck truck = new Truck(1, 10, 10);
     LinkedList<Delivery> request = new LinkedList<>();
-    truck.blockSlot(20, 50);
+    truck.addBlocker(20, 50, 50);
     Delivery delivery1 = new Delivery(1, 10);
     Delivery delivery2 = new Delivery(2, 30);
 
     request.add(delivery1);
     request.add(delivery2);
 
-    List<Bid> bids = truck.makeBids(request);
+    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
     assertEquals(4, bids.size());
 
     // first delivery arrives at 10, second at 60
@@ -37,14 +40,14 @@ public class TruckTest {
   public void testBlockerAtTheBeginning() {
     Truck truck = new Truck(1, 10, 10);
     LinkedList<Delivery> request = new LinkedList<>();
-    truck.blockSlot(10, 22);
+    truck.addBlocker(10, 22, 22);
     Delivery delivery1 = new Delivery(1, 20);
     Delivery delivery2 = new Delivery(2, 40);
 
     request.add(delivery1);
     request.add(delivery2);
 
-    List<Bid> bids = truck.makeBids(request);
+    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
     assertEquals(4, bids.size());
 
     // first delivery arrives at 10, second at 60
@@ -63,14 +66,14 @@ public class TruckTest {
   public void testBlockerInBetween() {
     Truck truck = new Truck(1, 10, 10);
     LinkedList<Delivery> request = new LinkedList<>();
-    truck.blockSlot(20, 30);
+    truck.addBlocker(20, 30, 30);
     Delivery delivery1 = new Delivery(1, 20);
     Delivery delivery2 = new Delivery(2, 30);
 
     request.add(delivery1);
     request.add(delivery2);
 
-    List<Bid> bids = truck.makeBids(request);
+    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
     assertEquals(4, bids.size());
 
     for (Bid bid : bids) {
@@ -83,4 +86,51 @@ public class TruckTest {
 
   }
 
+  @Test
+  public void testScheduleWithinValidRange() {
+    Truck truck = new Truck(1, 10, 10);
+    LinkedList<Delivery> request = new LinkedList<>();
+    // truck.blockSlot(20, 50);
+    request.add(new Delivery(1, 10));
+    request.add(new Delivery(2, 30));
+
+    truck.addBlocker(40, 60, 60);
+    request.add(new Delivery(3, 50));
+    request.add(new Delivery(4, 70));
+    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 60);
+
+    for (Bid bid : bids) {
+      Map<Delivery, Long> map = bid.getBidSet();
+
+      for (Entry<Delivery, Long> entry : map.entrySet()) {
+        assertTrue(entry.getKey().getProposedTime() - 20 >= 0);
+        assertTrue(entry.getKey().getProposedTime() <= 60);
+      }
+
+    }
+  }
+
+  @Test
+  public void testValidBidValue() {
+    Truck truck = new Truck(1, 10, 10);
+    LinkedList<Delivery> request = new LinkedList<>();
+    // truck.blockSlot(20, 50);
+    request.add(new Delivery(1, 10));
+    request.add(new Delivery(2, 30));
+
+    truck.addBlocker(40, 60, 60);
+    request.add(new Delivery(3, 50));
+    request.add(new Delivery(4, 70));
+    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
+
+    for (Bid bid : bids) {
+      Map<Delivery, Long> map = bid.getBidSet();
+
+      for (Entry<Delivery, Long> entry : map.entrySet()) {
+        assertEquals((long) entry.getValue(), entry.getKey().getProposedTime()
+            - entry.getKey().getRequestedTime());
+      }
+
+    }
+  }
 }

@@ -6,6 +6,8 @@ public class Delivery {
 
   private long requestedTime;
 
+  private long proposedTime;
+
   public Delivery(int id, long time) {
     this.id = id;
     requestedTime = time;
@@ -39,6 +41,29 @@ public class Delivery {
     this.requestedTime = requestedTime;
   }
 
+  /**
+   * @return the proposedTime
+   */
+  public long getProposedTime() {
+    return proposedTime;
+  }
+
+  /**
+   * @param proposedTime the proposedTime to set
+   */
+  public void setProposedTime(long proposedTime) {
+    this.proposedTime = proposedTime;
+  }
+
+  /**
+   * Returns a deep copy of this object.
+   */
+  public Delivery clone() {
+    Delivery clone = new Delivery(this.getId(), this.getRequestedTime());
+    clone.setProposedTime(this.proposedTime);
+    return clone;
+  }
+
   /*
    * (non-Javadoc)
    * 
@@ -46,7 +71,8 @@ public class Delivery {
    */
   @Override
   public String toString() {
-    return "Delivery [id=" + id + ", requestedTime=" + requestedTime + "]";
+    return "Delivery [id=" + id + ", requestedTime=" + requestedTime + ", proposedTime="
+        + proposedTime + "]";
   }
 
   /*
@@ -59,6 +85,7 @@ public class Delivery {
     final int prime = 31;
     int result = 1;
     result = prime * result + id;
+    result = prime * result + (int) (proposedTime ^ (proposedTime >>> 32));
     result = prime * result + (int) (requestedTime ^ (requestedTime >>> 32));
     return result;
   }
@@ -78,6 +105,8 @@ public class Delivery {
       return false;
     Delivery other = (Delivery) obj;
     if (id != other.id)
+      return false;
+    if (proposedTime != other.proposedTime)
       return false;
     if (requestedTime != other.requestedTime)
       return false;
