@@ -1,5 +1,10 @@
 package de.unihohenheim.wi.master.core;
 
+/**
+ * Models a job to be scheduled, which can be "productive" (a delivery) or "non-productive" (e.g.
+ * wait times).
+ *
+ */
 public class Job {
 
   private long duration;
@@ -8,6 +13,7 @@ public class Job {
 
   private long scheduledStart;
 
+  /** reference to a delivery, if there is any. */
   private Delivery delivery;
 
   private String id;
@@ -18,8 +24,8 @@ public class Job {
    * @param due
    * @param duration
    */
-  public Job(String id, long due, long duration) {
-    this.id = id;
+  public Job(Delivery delivery, long due, long duration) {
+    this.delivery = delivery;
     this.due = due;
     this.duration = duration;
   }

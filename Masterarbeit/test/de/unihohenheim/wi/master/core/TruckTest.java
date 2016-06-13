@@ -13,88 +13,16 @@ import org.junit.Test;
 
 public class TruckTest {
 
-  @Test
-  public void testBlockerAtTheEnd() {
-    Truck truck = new Truck(1, 10, 10);
-    LinkedList<Delivery> request = new LinkedList<>();
-    truck.addBlocker(20, 50, 50);
-    Delivery delivery1 = new Delivery(1, 10);
-    Delivery delivery2 = new Delivery(2, 30);
-
-    request.add(delivery1);
-    request.add(delivery2);
-
-    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
-    assertEquals(4, bids.size());
-
-    // first delivery arrives at 10, second at 60
-    for (Bid bid : bids) {
-      if (bid.getBidSet().size() == 2) {
-        assertEquals(10, (long) bid.getBidSet().get(delivery1));
-        assertEquals(60, (long) bid.getBidSet().get(delivery2));
-      }
-    }
-  }
-
-  @Test
-  public void testBlockerAtTheBeginning() {
-    Truck truck = new Truck(1, 10, 10);
-    LinkedList<Delivery> request = new LinkedList<>();
-    truck.addBlocker(10, 22, 22);
-    Delivery delivery1 = new Delivery(1, 20);
-    Delivery delivery2 = new Delivery(2, 40);
-
-    request.add(delivery1);
-    request.add(delivery2);
-
-    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
-    assertEquals(4, bids.size());
-
-    // first delivery arrives at 10, second at 60
-    for (Bid bid : bids) {
-      System.out.println(bid);
-      if (bid.getBidSet().size() == 2) {
-        assertEquals(32, (long) bid.getBidSet().get(delivery1));
-        assertEquals(52, (long) bid.getBidSet().get(delivery2));
-      }
-    }
-
-  }
-
-
-  @Test
-  public void testBlockerInBetween() {
-    Truck truck = new Truck(1, 10, 10);
-    LinkedList<Delivery> request = new LinkedList<>();
-    truck.addBlocker(20, 30, 30);
-    Delivery delivery1 = new Delivery(1, 20);
-    Delivery delivery2 = new Delivery(2, 30);
-
-    request.add(delivery1);
-    request.add(delivery2);
-
-    List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);
-    assertEquals(4, bids.size());
-
-    for (Bid bid : bids) {
-      System.out.println(bid);
-      if (bid.getBidSet().size() == 2) {
-        assertEquals(10, (long) bid.getBidSet().get(delivery1));
-        assertEquals(40, (long) bid.getBidSet().get(delivery2));
-      }
-    }
-
-  }
 
   @Test
   public void testScheduleWithinValidRange() {
-    Truck truck = new Truck(1, 10, 10);
+    Truck truck = new Truck(1, 20);
     LinkedList<Delivery> request = new LinkedList<>();
     // truck.blockSlot(20, 50);
     request.add(new Delivery(1, 10));
     request.add(new Delivery(2, 30));
 
-    truck.addBlocker(40, 60, 60);
+    truck.addBlocker(20, 60);
     request.add(new Delivery(3, 50));
     request.add(new Delivery(4, 70));
     List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 60);
@@ -112,13 +40,13 @@ public class TruckTest {
 
   @Test
   public void testValidBidValue() {
-    Truck truck = new Truck(1, 10, 10);
+    Truck truck = new Truck(1, 20);
     LinkedList<Delivery> request = new LinkedList<>();
     // truck.blockSlot(20, 50);
     request.add(new Delivery(1, 10));
     request.add(new Delivery(2, 30));
 
-    truck.addBlocker(40, 60, 60);
+    truck.addBlocker(20, 60);
     request.add(new Delivery(3, 50));
     request.add(new Delivery(4, 70));
     List<Bid> bids = truck.makeBidsForAllDeliveries(request, 0, 100);

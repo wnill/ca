@@ -1,6 +1,5 @@
 package de.unihohenheim.wi.master.core;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,42 +10,54 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.unihohenheim.wi.master.core.scheduling.MaximumLateness;
+import de.unihohenheim.wi.master.utils.PowerSet;
 
 public class Truck {
 
   private int id;
 
-  private long timeToDeliver;
-
-  private long timeToReturn;
+  /**
+   * time needed for a complete delivery roundtrip (drive to batch plant, loading, drive to
+   * construction site, offloading).
+   */
+  private long roundtripTime;
 
   private List<Timeslot> blockers = new LinkedList<>();
 
-  public Truck(int id, long deliverTime, long returnTime) {
+  public Truck(int id, long roundtripTime) {
     this.id = id;
-    this.timeToDeliver = deliverTime;
-    this.timeToReturn = returnTime;
+    this.roundtripTime = roundtripTime;
   }
 
-
-  public void addBlocker(long start, long end, long latest) {
-    Timeslot slot = new Timeslot(start, end);
-    slot.setLatestEnd(latest);
+  /**
+   * Models a timespan in which the truck is not available for deliveries, e.g. due to wait times.
+   * 
+   * @param start proposed start date
+   * @param end proposed end date
+   * @param latestEnd latest allowed finish date for this activity
+   */
+  public void addBlocker(long duration, long latestEnd) {
+    Timeslot slot = new Timeslot(duration, latestEnd);
+    slot.setLatestEnd(latestEnd);
     blockers.add(slot);
   }
 
+  /**
+   * Creates bids for the powerset of given deliveries, which are to be executed between an earliest
+   * start date and latest completion date.
+   * 
+   * @param deliveries
+   * @param earliestStart
+   * @param latestComplete
+   * @return List of bids
+   */
   public List<Bid> makeBidsForAllDeliveries(final List<Delivery> deliveries, long earliestStart,
       long latestComplete) {
 
-    // First find all possible subsets of requested deliveries
     Set<Set<Long>> powerset = getPowerSet(deliveries);
-
     List<Bid> bids = new LinkedList<>();
-    // Second, evaluate the "price" (deviation from requested time) of all sets
-
 
     for (Set<Long> bundle : powerset) {
-
       // Now we have a bundle containing one possible combination of deliveries
       TreeSet<Long> sortedBundle = new TreeSet<Long>(bundle);
       Bid newBid = createBid(sortedBundle, earliestStart, latestComplete, deliveries);
@@ -56,10 +67,12 @@ public class Truck {
   }
 
   /**
-   * Input is a sorted set containing the desired deliveries. This method tries to fit these desired
-   * delivery dates as good as possible into the schedule, considering blocked slots.
+   * Creates a bid (valuations for a given set of requested deliveries).
    * 
    * @param sortedBundle
+   * @param earliestStart
+   * @param latestComplete
+   * @param deliveries
    * @return
    */
   private Bid createBid(TreeSet<Long> sortedBundle, long earliestStart, long latestComplete,
@@ -68,12 +81,12 @@ public class Truck {
     // convert delivery dates to jobs
     LinkedList<Job> jobs = new LinkedList<>();
     for (Long dueDate : sortedBundle) {
-      jobs.add(new Job("delivery", dueDate, timeToDeliver + timeToReturn));
+      jobs.add(new Job(getDeliveryForRequestedTime(dueDate, deliveries), dueDate, roundtripTime));
     }
 
     // insert blockers
     for (Timeslot blocker : blockers) {
-      jobs.add(new Job("blocker", blocker.getLatestEnd(), blocker.getEnd() - blocker.getStart()));
+      jobs.add(new Job(null, blocker.getLatestEnd(), blocker.getDuration()));
     }
 
     // sort the complete list by job target start date
@@ -90,21 +103,24 @@ public class Truck {
 
     HashMap<Delivery, Long> bidmap = new HashMap<Delivery, Long>();
 
-    System.out.println("Optimal Schedule: " + schedule + " for target delivery dates "
-        + sortedBundle);
-
     for (Job job : schedule) {
-      if ("delivery".equals(job.getId())) {
-        Delivery delivery = getDeliveryForRequestedTime(job.getDue(), deliveries);
-        delivery.setProposedTime(job.getScheduledEnd());
+      if (job.getDelivery() != null) {
+        job.getDelivery().setProposedTime(job.getScheduledEnd());
         long valuation = job.getScheduledEnd() - job.getDue();
-        bidmap.put(delivery, valuation);
+        bidmap.put(job.getDelivery(), valuation);
       }
     }
     Bid bid = new Bid(bidmap);
     return bid;
   }
 
+  /**
+   * Returns a copy of a delivery contained in the given list which is due on a given time.
+   * 
+   * @param time
+   * @param deliveries
+   * @return
+   */
   public Delivery getDeliveryForRequestedTime(long time, List<Delivery> deliveries) {
     for (Delivery delivery : deliveries) {
       if (delivery.getRequestedTime() == time) {
@@ -125,40 +141,25 @@ public class Truck {
     for (Delivery delivery : deliveries) {
       deliveryDates.add(delivery.getRequestedTime());
     }
-    return powerSet(deliveryDates);
+    return PowerSet.powerSet(deliveryDates);
   }
 
-  /**
-   * Returns a set of all possible subsets of a given set.
-   * 
-   * @param originalSet
-   * @return
-   */
-  private static Set<Set<Long>> powerSet(Set<Long> originalSet) {
-    Set<Set<Long>> sets = new HashSet<Set<Long>>();
-    if (originalSet.isEmpty()) {
-      sets.add(new HashSet<Long>());
-      return sets;
-    }
-    List<Long> list = new ArrayList<Long>(originalSet);
-    Long head = list.get(0);
-    Set<Long> rest = new HashSet<Long>(list.subList(1, list.size()));
-    for (Set<Long> set : powerSet(rest)) {
-      Set<Long> newSet = new HashSet<Long>();
-      newSet.add(head);
-      newSet.addAll(set);
-      sets.add(newSet);
-      sets.add(set);
-    }
-    return sets;
-  }
 
 
   public class Timeslot {
 
-    private long start;
-    private long end;
+    private long duration;
     private long latestEnd;
+
+    /**
+     * 
+     * @param duration
+     * @param latestEnd
+     */
+    public Timeslot(long duration, long latestEnd) {
+      this.duration = duration;
+      this.latestEnd = latestEnd;
+    }
 
     /**
      * @return the latestEnd
@@ -174,6 +175,20 @@ public class Truck {
       this.latestEnd = latestEnd;
     }
 
+    /**
+     * @return the duration
+     */
+    public long getDuration() {
+      return duration;
+    }
+
+    /**
+     * @param duration the duration to set
+     */
+    public void setDuration(long duration) {
+      this.duration = duration;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -181,47 +196,9 @@ public class Truck {
      */
     @Override
     public String toString() {
-      return "Timeslot [start=" + start + ", end=" + end + "]";
+      return "Timeslot [duration=" + duration + ", latestEnd=" + latestEnd + "]";
     }
 
-    public Timeslot(long start, long end) {
-      this.start = start;
-      this.end = end;
-    }
 
-    /**
-     * @return the start
-     */
-    public long getStart() {
-      return start;
-    }
-
-    /**
-     * @return the end
-     */
-    public long getEnd() {
-      return end;
-    }
-
-    public boolean isTimeWithinThisSlot(long time) {
-      if (time > getStart() && time < getEnd())
-        return true;
-      else
-        return false;
-    }
-
-    public boolean collidesWith(Timeslot other) {
-      if ((other.getStart() < start && other.getEnd() > start)
-          || (other.getStart() > start && other.getEnd() < end)
-          || (other.getStart() < end && other.getEnd() > end))
-        return true;
-      else
-        return false;
-    }
-
-    public void addOffset(long time) {
-      start += time;
-      end += time;
-    }
   }
 }

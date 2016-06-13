@@ -5,12 +5,25 @@ import java.util.List;
 
 import de.unihohenheim.wi.master.core.Job;
 
+/**
+ * Implementation of the scheduling algorithm proposed by Sidney (1977) in: Optimal Single-Machine
+ * Scheduling with Earliness and Tariness Penalties.
+ *
+ */
 public class MaximumLateness {
 
+  /** Specifies penalty applied to early deliveries. */
   private long earlinessWeight;
 
+  /** Specifies penalty applied to late deliveries. */
   private long tardinessWeight;
 
+  /**
+   * Instantiation of Sidney's scheduling algorithm.
+   * 
+   * @param earlinessWeight
+   * @param tardinessWeight
+   */
   public MaximumLateness(long earlinessWeight, long tardinessWeight) {
     this.earlinessWeight = earlinessWeight;
     this.tardinessWeight = tardinessWeight;
@@ -46,6 +59,14 @@ public class MaximumLateness {
     }
   }
 
+  /**
+   * An admissible schedule is one, where for all jobs i and j with targeted start dates s[i]< s[j]
+   * it holds: due dates d[i] < d[j]. Such an admissible schedule is generated for given list of
+   * jobs.
+   * 
+   * @param jobs
+   * @return
+   */
   private List<Job> getAdmissibleSchedule(List<Job> jobs) {
     jobs.get(0).setScheduledStart(jobs.get(0).getTargetedStart());
 
@@ -74,7 +95,8 @@ public class MaximumLateness {
 
 
   /**
-   * Same as <code>calculateMaximumLateness</code> but more inefficient (n²). As proposed by Sidney.
+   * Calculates delta as proposed by Sidney. Same as <code>calculateMaximumLateness</code> but more
+   * inefficient (n²).
    * 
    * @param jobs
    * @return
@@ -102,7 +124,6 @@ public class MaximumLateness {
    * @return
    */
   private long calculateEarlinessOffset(long delta) {
-
     return delta / (1 + earlinessWeight / tardinessWeight);
   }
 

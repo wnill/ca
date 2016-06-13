@@ -2,7 +2,9 @@ package de.unihohenheim.wi.master.core;
 
 import java.util.Map;
 
-
+/**
+ * Models a "bid" given by a truck for a set of deliveries by specifying estimated delivery dates.
+ */
 public class Bid {
 
   private int id;
