@@ -1,4 +1,4 @@
-package de.wnill.master.utils;
+package de.wnill.master.core.utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;

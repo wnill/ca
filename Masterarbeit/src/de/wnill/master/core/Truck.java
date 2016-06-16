@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.wnill.master.core.scheduling.MaximumLateness;
-import de.wnill.master.utils.PowerSet;
+import de.wnill.master.core.utils.PowerSet;
 
 public class Truck {
 
