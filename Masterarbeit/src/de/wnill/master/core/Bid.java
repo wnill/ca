@@ -1,4 +1,4 @@
-package de.unihohenheim.wi.master.core;
+package de.wnill.master.core;
 
 import java.util.Map;
 
@@ -10,6 +10,8 @@ public class Bid {
   private int id;
 
   private long maxLateness = 0;
+
+  private long sumLateness = 0;
 
   private static int idCounter = 0;
 
@@ -24,10 +26,12 @@ public class Bid {
 
     if (bidSet != null && !bidSet.isEmpty()) {
       maxLateness = 0;
+      sumLateness = 0;
       for (Long value : bidSet.values()) {
         if (Math.abs(value) > maxLateness) {
           maxLateness = Math.abs(value);
         }
+        sumLateness += Math.abs(value);
       }
     }
   }
@@ -47,6 +51,14 @@ public class Bid {
     return maxLateness;
   }
 
+  /**
+   * @return the sumLateness
+   */
+  public long getLatenessSum() {
+    return sumLateness;
+  }
+
+
   /*
    * (non-Javadoc)
    * 
@@ -54,7 +66,8 @@ public class Bid {
    */
   @Override
   public String toString() {
-    return "Bid [id=" + id + ", maxLateness=" + maxLateness + ", bidSet=" + bidSet + "]";
+    return "Bid [id=" + id + ", maxLateness=" + maxLateness + ", sumLateness=" + sumLateness
+        + ", bidSet=" + bidSet + "]";
   }
 
 

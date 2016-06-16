@@ -1,4 +1,4 @@
-package de.unihohenheim.wi.master.core;
+package de.wnill.master.core;
 
 /**
  * Models a job to be scheduled, which can be "productive" (a delivery) or "non-productive" (e.g.

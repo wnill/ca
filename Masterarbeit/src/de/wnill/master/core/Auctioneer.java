@@ -1,4 +1,4 @@
-package de.unihohenheim.wi.master.core;
+package de.wnill.master.core;
 
 import java.util.LinkedList;
 import java.util.List;

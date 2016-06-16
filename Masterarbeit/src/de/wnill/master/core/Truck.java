@@ -1,4 +1,4 @@
-package de.unihohenheim.wi.master.core;
+package de.wnill.master.core;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.unihohenheim.wi.master.core.scheduling.MaximumLateness;
-import de.unihohenheim.wi.master.utils.PowerSet;
+import de.wnill.master.core.scheduling.MaximumLateness;
+import de.wnill.master.utils.PowerSet;
 
 public class Truck {
 

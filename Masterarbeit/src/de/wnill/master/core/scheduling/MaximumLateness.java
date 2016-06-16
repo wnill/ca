@@ -1,9 +1,9 @@
-package de.unihohenheim.wi.master.core.scheduling;
+package de.wnill.master.core.scheduling;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import de.unihohenheim.wi.master.core.Job;
+import de.wnill.master.core.Job;
 
 /**
  * Implementation of the scheduling algorithm proposed by Sidney (1977) in: Optimal Single-Machine

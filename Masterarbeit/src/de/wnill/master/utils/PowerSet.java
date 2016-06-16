@@ -1,4 +1,4 @@
-package de.unihohenheim.wi.master.utils;
+package de.wnill.master.utils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
