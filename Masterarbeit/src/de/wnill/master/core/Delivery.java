@@ -8,9 +8,9 @@ public class Delivery {
 
   private long proposedTime;
 
-  public Delivery(int id, long time) {
+  public Delivery(int id, long reqTime) {
     this.id = id;
-    requestedTime = time;
+    requestedTime = reqTime;
   }
 
   /**

@@ -10,7 +10,7 @@ import de.wnill.master.core.Job;
  * Scheduling with Earliness and Tariness Penalties.
  *
  */
-public class MaximumLateness {
+public class MaximumLateness implements SchedulingAlgorithm {
 
   /** Specifies penalty applied to early deliveries. */
   private long earlinessWeight;
