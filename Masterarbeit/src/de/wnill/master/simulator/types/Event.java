@@ -6,6 +6,13 @@ public abstract class Event {
 
   private LocalTime time;
 
+  private Context context;
+
+  public Event(Context context, LocalTime time) {
+    this.context = context;
+    this.time = time;
+  }
+
   /**
    * @return the time
    */
@@ -13,6 +20,27 @@ public abstract class Event {
     return time;
   }
 
-  public void execute() {}
+  /**
+   * @param time the time to set
+   */
+  public void setTime(LocalTime time) {
+    this.time = time;
+  }
+
+  /**
+   * @return the context
+   */
+  public Context getContext() {
+    return context;
+  }
+
+  /**
+   * @param context the context to set
+   */
+  public void setContext(Context context) {
+    this.context = context;
+  }
+
+  public abstract void execute();
 
 }

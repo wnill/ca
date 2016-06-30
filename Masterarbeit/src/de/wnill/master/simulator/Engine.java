@@ -2,7 +2,9 @@ package de.wnill.master.simulator;
 
 import java.util.PriorityQueue;
 
+import de.wnill.master.simulator.events.StartOrders;
 import de.wnill.master.simulator.types.Condition;
+import de.wnill.master.simulator.types.Context;
 import de.wnill.master.simulator.types.Event;
 import de.wnill.master.simulator.types.Scenario;
 import de.wnill.master.simulator.utils.EventComparator;
@@ -20,6 +22,8 @@ public class Engine implements Runnable {
 
   private Clock clock;
 
+  private Paver paver;
+
 
   private PriorityQueue<Event> events;
 
@@ -33,7 +37,11 @@ public class Engine implements Runnable {
   public void run() {
 
     // Initialize state
+    clock.setCurrentTime(scenario.getStartTime());
+    paver = new Paver(scenario);
     // Schedule initial event
+    addEvent(new StartOrders(new Context.ContextBuilder().paver(paver).build(),
+        scenario.getStartTime()));
 
     // Run simulation
     while (!endingCondition.isMet() && clock.getCurrentTime().isBefore(scenario.getEndTime())
