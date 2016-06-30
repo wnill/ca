@@ -1,12 +1,14 @@
 package de.wnill.master.core.scheduling;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import de.wnill.master.core.Job;
+import de.wnill.master.simulator.types.Job;
 
 /**
  * Algorithm as proposed by Garey, Tarjan and Wilfong (1988).
@@ -63,8 +65,8 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
 
     for (int n = 0; n < jobList.size() - 1; n++) {
 
-      if (jobList.get(n).getScheduledStart() + jobList.get(n).getDuration() < jobList.get(n + 1)
-          .getTargetedStart()) {
+      if (jobList.get(n).getScheduledStart().plus(jobList.get(n).getDuration())
+          .isBefore(jobList.get(n + 1).getTargetedStart())) {
         t++;
         first[t] = n + 1;
         last[t] = n + 1;
@@ -72,44 +74,57 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
         dec[t] = 0;
         jobList.get(n + 1).setScheduledStart(jobList.get(n + 1).getTargetedStart());
         heaps.add(t, new PriorityQueue<Entry>(new EntryComparator()));
-      } else if (jobList.get(n).getScheduledStart() + jobList.get(n).getDuration() == jobList.get(
-          n + 1).getTargetedStart()) {
+      } else if (jobList.get(n).getScheduledStart().plus(jobList.get(n).getDuration())
+          .equals(jobList.get(n + 1).getTargetedStart())) {
         last[t] = n + 1;
         inc[t]++;
         jobList.get(n + 1).setScheduledStart(
-            jobList.get(n).getScheduledStart() + jobList.get(n).getDuration());
-      } else if (jobList.get(n).getScheduledStart() + jobList.get(n).getDuration() > jobList.get(
-          n + 1).getTargetedStart()) {
+            jobList.get(n).getScheduledStart().plus(jobList.get(n).getDuration()));
+      } else if (jobList.get(n).getScheduledStart().plus(jobList.get(n).getDuration())
+          .isAfter(jobList.get(n + 1).getTargetedStart())) {
         last[t] = n + 1;
         dec[t]++;
         jobList.get(n + 1).setScheduledStart(
-            jobList.get(n).getScheduledStart() + jobList.get(n).getDuration());
+            jobList.get(n).getScheduledStart().plus(jobList.get(n).getDuration()));
         PriorityQueue<Entry> heap = heaps.get(t);
-        heap.add(new Entry(jobList.get(n + 1).getScheduledStart()
-            - jobList.get(n + 1).getTargetedStart(), n + 1));
+
+        Duration difference =
+            Duration.between(jobList.get(n + 1).getTargetedStart(), jobList.get(n + 1)
+                .getScheduledStart());
+
+        heap.add(new Entry(difference, n + 1));
         if (dec[t] == inc[t]) {
           // shift
-          long delta1 = heaps.get(t).peek().key;
-          long delta2 = 0;
+          Duration delta1 = Duration.from(heaps.get(t).peek().key);
+          Duration delta2;
+
 
           if (t == 0) {
-            delta2 = jobList.get(0).getScheduledStart();
+            delta2 = Duration.between(LocalTime.MIN, jobList.get(0).getScheduledStart());
           } else {
-            delta2 =
-                jobList.get(first[t]).getScheduledStart()
-                    - jobList.get(last[t - 1]).getScheduledStart()
-                    - jobList.get(last[n - 1]).getDuration();
+            Duration betweenFirstAndLast =
+                Duration.between(jobList.get(last[t - 1]).getScheduledStart(), jobList
+                    .get(first[t]).getScheduledStart());
+            delta2 = betweenFirstAndLast.minus(jobList.get(last[n - 1]).getDuration());
           }
-          long delta = Math.min(delta1, delta2);
+
+          Duration delta;
+          if (delta1.compareTo(delta2) < 0) {
+            delta = delta1;
+          } else {
+            delta = delta2;
+          }
+
 
           for (Entry entry : heap) {
-            entry.key -= delta;
+            entry.key = entry.key.minus(delta);
           }
-          jobList.get(first[t])
-              .setScheduledStart(jobList.get(first[t]).getScheduledStart() - delta);
-          jobList.get(last[t]).setScheduledStart(jobList.get(last[t]).getScheduledStart() - delta);
+          jobList.get(first[t]).setScheduledStart(
+              jobList.get(first[t]).getScheduledStart().minus(delta));
+          jobList.get(last[t]).setScheduledStart(
+              jobList.get(last[t]).getScheduledStart().minus(delta));
 
-          while (!heap.isEmpty() && heap.peek().key == 0) {
+          while (!heap.isEmpty() && heap.peek().key.isZero()) {
             heap.poll();
             dec[t]--;
             inc[t]++;
@@ -118,8 +133,12 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
           // ATTENTION: t > 0 contraint added by me!
 
           if (t > 0
-              && jobList.get(first[t]).getScheduledStart() == jobList.get(last[t - 1])
-                  .getScheduledStart() + jobList.get(last[t - 1]).getDuration()) {
+              && jobList
+                  .get(first[t])
+                  .getScheduledStart()
+                  .equals(
+                      jobList.get(last[t - 1]).getScheduledStart()
+                          .plus(jobList.get(last[t - 1]).getDuration()))) {
             heaps.get(t - 1).addAll(heap);
             heap.clear();
             last[t - 1] = last[t];
@@ -146,7 +165,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
 
       if (!containedInFirst) {
         jobList.get(i).setScheduledStart(
-            jobList.get(i - 1).getScheduledStart() + jobList.get(i - 1).getDuration());
+            jobList.get(i - 1).getScheduledStart().plus(jobList.get(i - 1).getDuration()));
       }
     }
 
@@ -154,11 +173,19 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
     return jobList;
   }
 
-  private long calculateLatenessSum(List<Job> schedule) {
+  /**
+   * Lateness calculated in minutes
+   * 
+   * @param schedule
+   * @return
+   */
+  public long calculateLatenessSum(List<Job> schedule) {
     long totalLateness = 0;
 
     for (Job job : schedule) {
-      totalLateness += Math.abs(job.getScheduledEnd() - job.getDelivery().getRequestedTime());
+      totalLateness +=
+          Math.abs(Duration.between(job.getScheduledEnd(), job.getDelivery().getRequestedTime())
+              .getSeconds()) / 60;
     }
 
     return totalLateness;
@@ -196,7 +223,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
 
 
   public class Entry {
-    private long key;
+    private Duration key;
     private int value;
 
     /**
@@ -204,7 +231,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
      * @param key
      * @param value
      */
-    public Entry(Long key, Integer value) {
+    public Entry(Duration key, Integer value) {
       this.key = key;
       this.value = value;
     }
@@ -214,7 +241,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
 
     @Override
     public int compare(Entry o1, Entry o2) {
-      return (int) (o1.key - o2.key);
+      return (int) (o1.key.compareTo(o2.key));
     }
 
   }

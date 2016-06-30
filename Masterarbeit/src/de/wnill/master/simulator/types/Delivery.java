@@ -1,14 +1,16 @@
-package de.wnill.master.core;
+package de.wnill.master.simulator.types;
+
+import java.time.LocalTime;
 
 public class Delivery {
 
   private int id;
 
-  private long requestedTime;
+  private LocalTime requestedTime;
 
-  private long proposedTime;
+  private LocalTime proposedTime;
 
-  public Delivery(int id, long reqTime) {
+  public Delivery(int id, LocalTime reqTime) {
     this.id = id;
     requestedTime = reqTime;
   }
@@ -27,31 +29,33 @@ public class Delivery {
     this.id = id;
   }
 
+
+
   /**
    * @return the requestedTime
    */
-  public long getRequestedTime() {
+  public LocalTime getRequestedTime() {
     return requestedTime;
   }
 
   /**
    * @param requestedTime the requestedTime to set
    */
-  public void setRequestedTime(long requestedTime) {
+  public void setRequestedTime(LocalTime requestedTime) {
     this.requestedTime = requestedTime;
   }
 
   /**
    * @return the proposedTime
    */
-  public long getProposedTime() {
+  public LocalTime getProposedTime() {
     return proposedTime;
   }
 
   /**
    * @param proposedTime the proposedTime to set
    */
-  public void setProposedTime(long proposedTime) {
+  public void setProposedTime(LocalTime proposedTime) {
     this.proposedTime = proposedTime;
   }
 
@@ -67,17 +71,6 @@ public class Delivery {
   /*
    * (non-Javadoc)
    * 
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    return "Delivery [id=" + id + ", requestedTime=" + requestedTime + ", proposedTime="
-        + proposedTime + "]";
-  }
-
-  /*
-   * (non-Javadoc)
-   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -85,8 +78,8 @@ public class Delivery {
     final int prime = 31;
     int result = 1;
     result = prime * result + id;
-    result = prime * result + (int) (proposedTime ^ (proposedTime >>> 32));
-    result = prime * result + (int) (requestedTime ^ (requestedTime >>> 32));
+    result = prime * result + ((proposedTime == null) ? 0 : proposedTime.hashCode());
+    result = prime * result + ((requestedTime == null) ? 0 : requestedTime.hashCode());
     return result;
   }
 
@@ -106,11 +99,28 @@ public class Delivery {
     Delivery other = (Delivery) obj;
     if (id != other.id)
       return false;
-    if (proposedTime != other.proposedTime)
+    if (proposedTime == null) {
+      if (other.proposedTime != null)
+        return false;
+    } else if (!proposedTime.equals(other.proposedTime))
       return false;
-    if (requestedTime != other.requestedTime)
+    if (requestedTime == null) {
+      if (other.requestedTime != null)
+        return false;
+    } else if (!requestedTime.equals(other.requestedTime))
       return false;
     return true;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "Delivery [id=" + id + ", requestedTime=" + requestedTime + ", proposedTime="
+        + proposedTime + "]";
   }
 
 

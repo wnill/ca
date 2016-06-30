@@ -1,4 +1,4 @@
-package de.wnill.master.core;
+package de.wnill.master.simulator;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.wnill.master.core.Bid;
 import de.wnill.master.core.scheduling.MaximumLateness;
 import de.wnill.master.core.utils.PowerSet;
+import de.wnill.master.simulator.types.Delivery;
+import de.wnill.master.simulator.types.Job;
 
 public class Truck {
 
@@ -23,6 +26,10 @@ public class Truck {
   private long roundtripTime;
 
   private List<Timeslot> blockers = new LinkedList<>();
+
+  public Truck(int id) {
+    this.id = id;
+  }
 
   public Truck(int id, long roundtripTime) {
     this.id = id;

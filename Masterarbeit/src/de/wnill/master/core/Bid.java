@@ -2,6 +2,8 @@ package de.wnill.master.core;
 
 import java.util.Map;
 
+import de.wnill.master.simulator.types.Delivery;
+
 /**
  * Models a "bid" given by a truck for a set of deliveries by specifying estimated delivery dates.
  */

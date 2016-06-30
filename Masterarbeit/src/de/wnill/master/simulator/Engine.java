@@ -1,5 +1,7 @@
 package de.wnill.master.simulator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 
 import de.wnill.master.simulator.events.StartOrders;
@@ -24,24 +26,22 @@ public class Engine implements Runnable {
 
   private Paver paver;
 
+  private List<Truck> trucks;
+
 
   private PriorityQueue<Event> events;
 
   public Engine(Condition endingCondition, Scenario scenario) {
     clock = new Clock(scenario.getStartTime());
     this.scenario = scenario;
+
     events = new PriorityQueue<>(new EventComparator());
   }
 
   @Override
   public void run() {
 
-    // Initialize state
-    clock.setCurrentTime(scenario.getStartTime());
-    paver = new Paver(scenario);
-    // Schedule initial event
-    addEvent(new StartOrders(new Context.ContextBuilder().paver(paver).build(),
-        scenario.getStartTime()));
+    initialize();
 
     // Run simulation
     while (!endingCondition.isMet() && clock.getCurrentTime().isBefore(scenario.getEndTime())
@@ -54,6 +54,23 @@ public class Engine implements Runnable {
 
     // Generate report
 
+  }
+
+  /**
+   * Set up initial state and first event.
+   */
+  private void initialize() {
+    // Initialize state
+    clock.setCurrentTime(scenario.getStartTime());
+    paver = new Paver(scenario);
+    trucks = new ArrayList<>();
+    for (int i = 0; i < scenario.getTruckCount(); i++) {
+      trucks.add(new Truck(i));
+    }
+
+    // Schedule initial event
+    addEvent(new StartOrders(new Context.ContextBuilder().paver(paver).build(),
+        scenario.getStartTime()));
   }
 
   public void addEvent(Event event) {

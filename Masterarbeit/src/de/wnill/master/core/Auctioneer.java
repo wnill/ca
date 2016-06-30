@@ -3,6 +3,9 @@ package de.wnill.master.core;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.wnill.master.simulator.Truck;
+import de.wnill.master.simulator.types.Delivery;
+
 
 public class Auctioneer {
 

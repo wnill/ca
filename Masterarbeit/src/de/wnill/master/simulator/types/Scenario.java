@@ -5,25 +5,33 @@ import java.time.LocalTime;
 
 public class Scenario {
 
+  // General
+
   /** the simulation start time */
   private LocalTime startTime;
 
-  /** the target time for the first delivery. */
-  private LocalTime firstDockingTime;
-
   private LocalTime endTime;
+
+  private OrderType orderType;
+
+  // Truck related
+
+  private int truckCount;
 
   private Duration loadingDuration;
 
   private Duration offloadingDuration;
 
-  private OrderType orderType;
 
-  /** in meters */
-  private long distanceToPave;
+  // Paver related
+  /** the target time for the first delivery. */
+  private LocalTime firstDockingTime;
 
-  /** required amount of asphalt per meter - models parameters such as screed width */
-  private double truckloadPerMeter;
+  /** how many deliveries must be ordered at least at any given time */
+  private int orderAheadMinimum;
+
+  /** how many deliveries may be ordered at most at any given time */
+  private int orderAheadMaximum;
 
   /**
    * @return the firstDockingTime
@@ -37,6 +45,20 @@ public class Scenario {
    */
   public void setFirstDockingTime(LocalTime firstDockingTime) {
     this.firstDockingTime = firstDockingTime;
+  }
+
+  /**
+   * @return the truckCount
+   */
+  public int getTruckCount() {
+    return truckCount;
+  }
+
+  /**
+   * @param truckCount the truckCount to set
+   */
+  public void setTruckCount(int truckCount) {
+    this.truckCount = truckCount;
   }
 
   /**
@@ -82,32 +104,33 @@ public class Scenario {
   }
 
   /**
-   * @return the distanceToPave
+   * @return the orderAheadMinimum
    */
-  public long getDistanceToPave() {
-    return distanceToPave;
+  public int getOrderAheadMinimum() {
+    return orderAheadMinimum;
   }
 
   /**
-   * @param distanceToPave the distanceToPave to set
+   * @param orderAheadMinimum the orderAheadMinimum to set
    */
-  public void setDistanceToPave(long distanceToPave) {
-    this.distanceToPave = distanceToPave;
+  public void setOrderAheadMinimum(int orderAheadMinimum) {
+    this.orderAheadMinimum = orderAheadMinimum;
   }
 
   /**
-   * @return the truckloadPerMeter
+   * @return the orderAheadMaximum
    */
-  public double getTruckloadPerMeter() {
-    return truckloadPerMeter;
+  public int getOrderAheadMaximum() {
+    return orderAheadMaximum;
   }
 
   /**
-   * @param truckloadPerMeter the truckloadPerMeter to set
+   * @param orderAheadMaximum the orderAheadMaximum to set
    */
-  public void setTruckloadPerMeter(double truckloadPerMeter) {
-    this.truckloadPerMeter = truckloadPerMeter;
+  public void setOrderAheadMaximum(int orderAheadMaximum) {
+    this.orderAheadMaximum = orderAheadMaximum;
   }
+
 
   /**
    * @return the startTime

@@ -1,4 +1,7 @@
-package de.wnill.master.core;
+package de.wnill.master.simulator.types;
+
+import java.time.Duration;
+import java.time.LocalTime;
 
 /**
  * Models a job to be scheduled, which can be "productive" (a delivery) or "non-productive" (e.g.
@@ -7,11 +10,11 @@ package de.wnill.master.core;
  */
 public class Job {
 
-  private long duration;
+  private Duration duration;
 
-  private long due;
+  private LocalTime due;
 
-  private long scheduledStart;
+  private LocalTime scheduledStart;
 
   /** reference to a delivery, if there is any. */
   private Delivery delivery;
@@ -24,61 +27,82 @@ public class Job {
    * @param due
    * @param duration
    */
-  public Job(Delivery delivery, long due, long duration) {
+  public Job(Delivery delivery, LocalTime due, Duration duration) {
     this.delivery = delivery;
     this.due = due;
     this.duration = duration;
   }
 
 
+
   /**
    * @return the duration
    */
-  public long getDuration() {
+  public Duration getDuration() {
     return duration;
   }
+
+
 
   /**
    * @param duration the duration to set
    */
-  public void setDuration(long duration) {
+  public void setDuration(Duration duration) {
     this.duration = duration;
   }
+
+
 
   /**
    * @return the due
    */
-  public long getDue() {
+  public LocalTime getDue() {
     return due;
   }
+
+
 
   /**
    * @param due the due to set
    */
-  public void setDue(long due) {
+  public void setDue(LocalTime due) {
     this.due = due;
   }
 
-  public long getTargetedStart() {
-    return due - duration;
-  }
+
 
   /**
-   * @return the scheduled
+   * @return the scheduledStart
    */
-  public long getScheduledStart() {
+  public LocalTime getScheduledStart() {
     return scheduledStart;
   }
 
+
+
   /**
-   * @param scheduled the scheduled to set
+   * @param scheduledStart the scheduledStart to set
    */
-  public void setScheduledStart(long scheduled) {
-    this.scheduledStart = scheduled;
+  public void setScheduledStart(LocalTime scheduledStart) {
+    this.scheduledStart = scheduledStart;
   }
 
-  public long getScheduledEnd() {
-    return scheduledStart + duration;
+  /**
+   * @return the scheduledEnd
+   */
+  public LocalTime getScheduledEnd() {
+    return scheduledStart.plus(duration);
+  }
+
+
+
+  /**
+   * The targeted time to start the job, so that the deviation from due time is 0.
+   * 
+   * @return
+   */
+  public LocalTime getTargetedStart() {
+    return due.minus(duration);
   }
 
 

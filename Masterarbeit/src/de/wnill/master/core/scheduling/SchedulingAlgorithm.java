@@ -2,7 +2,7 @@ package de.wnill.master.core.scheduling;
 
 import java.util.List;
 
-import de.wnill.master.core.Job;
+import de.wnill.master.simulator.types.Job;
 
 @FunctionalInterface
 public interface SchedulingAlgorithm {

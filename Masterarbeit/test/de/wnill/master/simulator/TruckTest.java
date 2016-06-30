@@ -1,4 +1,4 @@
-package de.wnill.master.core;
+package de.wnill.master.simulator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -11,8 +11,8 @@ import java.util.Map.Entry;
 import org.junit.Test;
 
 import de.wnill.master.core.Bid;
-import de.wnill.master.core.Delivery;
-import de.wnill.master.core.Truck;
+import de.wnill.master.simulator.Truck;
+import de.wnill.master.simulator.types.Delivery;
 
 
 public class TruckTest {

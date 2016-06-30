@@ -1,5 +1,8 @@
 package de.wnill.master.simulator;
 
+import java.util.PriorityQueue;
+
+import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Scenario;
 
 public class Paver {
@@ -10,7 +13,11 @@ public class Paver {
   /** meter per minute */
   private double maxSpeed;
 
-  private double pavedDistance;
+  /** 1 truck is assumed to be unloading, additional trucks are queued up waiting. */
+  private int trucksInFrontOfPaver;
+
+  /** contains all deliveries that have been completed yet, sorted by docking time. */
+  private PriorityQueue<Delivery> pendingDeliveries;
 
   private Scenario scenario;
 
