@@ -1,7 +1,10 @@
 package de.wnill.master.simulator;
 
-import java.util.PriorityQueue;
+import java.time.LocalTime;
+import java.util.LinkedList;
+import java.util.List;
 
+import de.wnill.master.core.Bid;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Scenario;
 
@@ -17,17 +20,43 @@ public class Paver {
   private int trucksInFrontOfPaver;
 
   /** contains all deliveries that have been completed yet, sorted by docking time. */
-  private PriorityQueue<Delivery> pendingDeliveries;
+  private LinkedList<Delivery> pendingDeliveries = new LinkedList<>();
+
+  private LinkedList<Delivery> completedDeliveries = new LinkedList<>();
 
   private Scenario scenario;
+
+  private int deliveryCounter = 1;
 
   public Paver(Scenario scenario) {
     this.scenario = scenario;
   }
 
-  public void placeOrder() {
-    // TODO Auto-generated method stub
+  /**
+   * Triggers the next batch of delivery order(s).
+   */
+  public void placeOrder(List<Truck> trucks) {
+    LinkedList<Delivery> requests = new LinkedList<>();
+    LocalTime nextDeliveryTime = scenario.getFirstDockingTime();
+
+    if (!pendingDeliveries.isEmpty()) {
+      nextDeliveryTime =
+          pendingDeliveries.getLast().getRequestedTime()
+              .plus(scenario.getOptimalDeliveryInterval());
+    }
+
+    while (pendingDeliveries.size() < scenario.getOrderAheadMinimum()) {
+      Delivery delivery = new Delivery(deliveryCounter++, nextDeliveryTime);
+      requests.add(delivery);
+      pendingDeliveries.add(delivery);
+      nextDeliveryTime = nextDeliveryTime.plus(scenario.getOptimalDeliveryInterval());
+    }
+
+    for (Truck truck : trucks) {
+      List<Bid> bids =
+          truck.makeBids(requests, Clock.getInstance().getCurrentTime(), scenario.getEndTime());
+      System.out.println(bids);
+    }
 
   }
-
 }

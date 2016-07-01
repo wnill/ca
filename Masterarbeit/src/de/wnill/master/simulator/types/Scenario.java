@@ -20,7 +20,7 @@ public class Scenario {
 
   private int truckCount;
 
-  private Duration loadingDuration;
+  private Duration roundtripTime;
 
   private Duration offloadingDuration;
 
@@ -31,11 +31,15 @@ public class Scenario {
   /** the target time for the first delivery. */
   private LocalTime firstDockingTime;
 
+  private Duration optimalDeliveryInterval;
+
   /** how many deliveries must be ordered at least at any given time */
   private int orderAheadMinimum;
 
   /** how many deliveries may be ordered at most at any given time */
   private int orderAheadMaximum;
+
+
 
   /**
    * @return the firstDockingTime
@@ -65,18 +69,19 @@ public class Scenario {
     this.truckCount = truckCount;
   }
 
+
   /**
-   * @return the loadingDuration
+   * @return the roundtripTime
    */
-  public Duration getLoadingDuration() {
-    return loadingDuration;
+  public Duration getRoundtripTime() {
+    return roundtripTime;
   }
 
   /**
-   * @param loadingDuration the loadingDuration to set
+   * @param roundtripTime the roundtripTime to set
    */
-  public void setLoadingDuration(Duration loadingDuration) {
-    this.loadingDuration = loadingDuration;
+  public void setRoundtripTime(Duration roundtripTime) {
+    this.roundtripTime = roundtripTime;
   }
 
   /**
@@ -84,6 +89,20 @@ public class Scenario {
    */
   public Duration getOffloadingDuration() {
     return offloadingDuration;
+  }
+
+  /**
+   * @return the optimalDeliveryInterval
+   */
+  public Duration getOptimalDeliveryInterval() {
+    return optimalDeliveryInterval;
+  }
+
+  /**
+   * @param optimalDeliveryInterval the optimalDeliveryInterval to set
+   */
+  public void setOptimalDeliveryInterval(Duration optimalDeliveryInterval) {
+    this.optimalDeliveryInterval = optimalDeliveryInterval;
   }
 
   /**

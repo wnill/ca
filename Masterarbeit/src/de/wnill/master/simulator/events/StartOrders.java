@@ -18,7 +18,12 @@ public class StartOrders extends Event {
 
   @Override
   public void execute() {
-    getContext().getPaver().placeOrder();
+
+    if (getContext().getPaver() == null || getContext().getTrucks() == null) {
+      throw new IllegalStateException("No paver or no trucks defined");
+    }
+
+    getContext().getPaver().placeOrder(getContext().getTrucks());
   }
 
 }

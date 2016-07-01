@@ -22,8 +22,6 @@ public class Engine implements Runnable {
 
   private Condition endingCondition;
 
-  private Clock clock;
-
   private Paver paver;
 
   private List<Truck> trucks;
@@ -32,7 +30,8 @@ public class Engine implements Runnable {
   private PriorityQueue<Event> events;
 
   public Engine(Condition endingCondition, Scenario scenario) {
-    clock = new Clock(scenario.getStartTime());
+    Clock.getInstance().setCurrentTime(scenario.getStartTime());
+    this.endingCondition = endingCondition;
     this.scenario = scenario;
 
     events = new PriorityQueue<>(new EventComparator());
@@ -44,10 +43,11 @@ public class Engine implements Runnable {
     initialize();
 
     // Run simulation
-    while (!endingCondition.isMet() && clock.getCurrentTime().isBefore(scenario.getEndTime())
+    while (!endingCondition.isMet()
+        && Clock.getInstance().getCurrentTime().isBefore(scenario.getEndTime())
         && !events.isEmpty()) {
       Event nextEvent = events.poll();
-      clock.setCurrentTime(nextEvent.getTime());
+      Clock.getInstance().setCurrentTime(nextEvent.getTime());
       nextEvent.execute();
       // Update statistics
     }
@@ -61,15 +61,17 @@ public class Engine implements Runnable {
    */
   private void initialize() {
     // Initialize state
-    clock.setCurrentTime(scenario.getStartTime());
+    Clock.getInstance().setCurrentTime(scenario.getStartTime());
     paver = new Paver(scenario);
     trucks = new ArrayList<>();
     for (int i = 0; i < scenario.getTruckCount(); i++) {
-      trucks.add(new Truck(i, scenario.getSchedulingAlgorithm()));
+      Truck truck = new Truck(i, scenario.getSchedulingAlgorithm());
+      truck.setRoundtripTime(scenario.getRoundtripTime());
+      trucks.add(truck);
     }
 
     // Schedule initial event
-    addEvent(new StartOrders(new Context.ContextBuilder().paver(paver).build(),
+    addEvent(new StartOrders(new Context.ContextBuilder().paver(paver).trucks(trucks).build(),
         scenario.getStartTime()));
   }
 

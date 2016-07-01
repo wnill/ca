@@ -6,8 +6,15 @@ public class Clock {
 
   private LocalTime currentTime;
 
-  public Clock(LocalTime initValue) {
-    currentTime = initValue;
+  private static Clock instance;
+
+  private Clock() {}
+
+  public static Clock getInstance() {
+    if (instance == null) {
+      instance = new Clock();
+    }
+    return instance;
   }
 
   /**

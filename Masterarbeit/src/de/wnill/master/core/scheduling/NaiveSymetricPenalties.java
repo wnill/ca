@@ -27,15 +27,15 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
     System.out.println("Generated " + allPermutations.size() + " permutations");
 
     for (List<Job> jobList : allPermutations) {
+      if (!jobList.isEmpty()) {
+        List<Job> schedule = findOptimalJobTimes(jobList);
+        long lateness = calculateLatenessSum(schedule);
+        if (lateness < lowestLateness) {
+          bestSchedule = schedule;
+          lowestLateness = lateness;
 
-      List<Job> schedule = findOptimalJobTimes(jobList);
-      long lateness = calculateLatenessSum(schedule);
-      if (lateness < lowestLateness) {
-        bestSchedule = schedule;
-        lowestLateness = lateness;
-
-        System.out.println("Total lateness: " + lateness + " of Schedule " + schedule);
-
+          System.out.println("Total lateness: " + lateness + " of Schedule " + schedule);
+        }
       }
     }
 

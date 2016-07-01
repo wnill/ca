@@ -34,7 +34,7 @@ public class Truck {
    * time needed for a complete delivery roundtrip (drive to batch plant, loading, drive to
    * construction site, offloading).
    */
-  private Duration roundtripTime;
+  private Duration roundtripTime = Duration.ZERO;
 
   public Truck(int id, SchedulingAlgorithm scheduler) {
     this.id = id;
@@ -74,6 +74,9 @@ public class Truck {
   public List<Bid> makeBids(final List<Delivery> deliveries, LocalTime earliestStart,
       LocalTime latestComplete) {
 
+    if (roundtripTime.isZero())
+      throw new IllegalStateException("roundtriptime is null for truck " + id);
+
     Set<Set<Delivery>> powerset = getPowerSet(deliveries);
     List<Bid> bids = new LinkedList<>();
 
@@ -102,7 +105,6 @@ public class Truck {
    * @return
    */
   private Bid createBid(Set<Delivery> bundle, LocalTime earliestStart, LocalTime latestComplete) {
-
 
     // convert deliveries to jobs
     LinkedList<Job> jobs = new LinkedList<>();
