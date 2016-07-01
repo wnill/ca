@@ -22,6 +22,7 @@ public class Job {
   private String id;
 
   /**
+   * Constructor for productive jobs.
    * 
    * @param id
    * @param due
@@ -29,6 +30,17 @@ public class Job {
    */
   public Job(Delivery delivery, LocalTime due, Duration duration) {
     this.delivery = delivery;
+    this.due = due;
+    this.duration = duration;
+  }
+
+  /**
+   * Constructor for non-productive jobs.
+   * 
+   * @param due
+   * @param duration
+   */
+  public Job(LocalTime due, Duration duration) {
     this.due = due;
     this.duration = duration;
   }

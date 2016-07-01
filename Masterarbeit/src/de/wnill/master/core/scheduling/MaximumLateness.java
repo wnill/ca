@@ -1,5 +1,6 @@
 package de.wnill.master.core.scheduling;
 
+import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -171,6 +172,12 @@ public class MaximumLateness implements SchedulingAlgorithm {
     }
 
     return jobs;
+  }
+
+  @Override
+  public List<Job> scheduleJobs(List<Job> jobs, LocalTime earliestStart, LocalTime latestComplete) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

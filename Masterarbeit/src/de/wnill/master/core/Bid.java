@@ -1,6 +1,8 @@
 package de.wnill.master.core;
 
-import java.util.Map;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import de.wnill.master.simulator.types.Delivery;
 
@@ -11,53 +13,60 @@ public class Bid {
 
   private int id;
 
-  private long maxLateness = 0;
+  private Duration maxLateness = Duration.ZERO;
 
-  private long sumLateness = 0;
+  private Duration sumLateness = Duration.ZERO;
 
   private static int idCounter = 0;
 
-  /** Delivery -> offered time */
-  private Map<Delivery, Long> bidSet;
+  private LinkedList<Delivery> deliveries = new LinkedList<>();
 
 
-  public Bid(Map<Delivery, Long> bidmap) {
-    bidSet = bidmap;
-    id = idCounter;
-    idCounter++;
-
-    if (bidSet != null && !bidSet.isEmpty()) {
-      maxLateness = 0;
-      sumLateness = 0;
-      for (Long value : bidSet.values()) {
-        if (Math.abs(value) > maxLateness) {
-          maxLateness = Math.abs(value);
-        }
-        sumLateness += Math.abs(value);
+  public Bid(Collection<Delivery> deliveries) {
+    for (Delivery delivery : deliveries) {
+      this.deliveries.add(delivery.clone());
+      Duration deviation =
+          Duration.between(delivery.getRequestedTime(), delivery.getProposedTime()).abs();
+      sumLateness = sumLateness.plus(deviation);
+      if (deviation.compareTo(maxLateness) > 0) {
+        maxLateness = deviation;
       }
     }
+
+    id = idCounter;
+    idCounter++;
   }
 
+
   /**
-   * @return the bidSet
+   * @return the id
    */
-  public Map<Delivery, Long> getBidSet() {
-    return bidSet;
+  public int getId() {
+    return id;
   }
 
 
   /**
    * @return the maxLateness
    */
-  public long getMaxLateness() {
+  public Duration getMaxLateness() {
     return maxLateness;
   }
+
 
   /**
    * @return the sumLateness
    */
-  public long getLatenessSum() {
+  public Duration getSumLateness() {
     return sumLateness;
+  }
+
+
+  /**
+   * @return the deliveries
+   */
+  public LinkedList<Delivery> getDeliveries() {
+    return deliveries;
   }
 
 
@@ -69,8 +78,9 @@ public class Bid {
   @Override
   public String toString() {
     return "Bid [id=" + id + ", maxLateness=" + maxLateness + ", sumLateness=" + sumLateness
-        + ", bidSet=" + bidSet + "]";
+        + ", deliveries=" + deliveries + "]";
   }
+
 
 
 }

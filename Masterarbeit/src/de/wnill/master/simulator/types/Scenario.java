@@ -3,6 +3,8 @@ package de.wnill.master.simulator.types;
 import java.time.Duration;
 import java.time.LocalTime;
 
+import de.wnill.master.core.scheduling.SchedulingAlgorithm;
+
 public class Scenario {
 
   // General
@@ -21,6 +23,8 @@ public class Scenario {
   private Duration loadingDuration;
 
   private Duration offloadingDuration;
+
+  private SchedulingAlgorithm schedulingAlgorithm;
 
 
   // Paver related
@@ -131,6 +135,20 @@ public class Scenario {
     this.orderAheadMaximum = orderAheadMaximum;
   }
 
+
+  /**
+   * @return the schedulingAlgorithm
+   */
+  public SchedulingAlgorithm getSchedulingAlgorithm() {
+    return schedulingAlgorithm;
+  }
+
+  /**
+   * @param schedulingAlgorithm the schedulingAlgorithm to set
+   */
+  public void setSchedulingAlgorithm(SchedulingAlgorithm schedulingAlgorithm) {
+    this.schedulingAlgorithm = schedulingAlgorithm;
+  }
 
   /**
    * @return the startTime

@@ -1,16 +1,16 @@
 package de.wnill.master.simulator;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import de.wnill.master.core.Bid;
-import de.wnill.master.core.scheduling.MaximumLateness;
+import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.utils.PowerSet;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
@@ -19,35 +19,48 @@ public class Truck {
 
   private int id;
 
+  private SchedulingAlgorithm scheduler;
+
+  /**
+   * Contains a list of all truck-specific jobs that MUST be executed - pauses, maintenance, etc.
+   * but have not been scheduled yet.
+   */
+  private List<Job> unscheduledPrivateJobs = new LinkedList<>();
+
+  /** The truck's schedule, thus, jobs that have been assigned an execution time. */
+  private ArrayList<Job> schedule = new ArrayList<>();
+
   /**
    * time needed for a complete delivery roundtrip (drive to batch plant, loading, drive to
    * construction site, offloading).
    */
-  private long roundtripTime;
+  private Duration roundtripTime;
 
-  private List<Timeslot> blockers = new LinkedList<>();
-
-  public Truck(int id) {
+  public Truck(int id, SchedulingAlgorithm scheduler) {
     this.id = id;
+    this.scheduler = scheduler;
   }
 
-  public Truck(int id, long roundtripTime) {
-    this.id = id;
-    this.roundtripTime = roundtripTime;
-  }
 
   /**
-   * Models a timespan in which the truck is not available for deliveries, e.g. due to wait times.
+   * Adds a job to the list of truck jobs, during which it is not available for deliveries, e.g. due
+   * to wait times.
    * 
    * @param start proposed start date
    * @param end proposed end date
    * @param latestEnd latest allowed finish date for this activity
    */
-  public void addBlocker(long duration, long latestEnd) {
-    Timeslot slot = new Timeslot(duration, latestEnd);
-    slot.setLatestEnd(latestEnd);
-    blockers.add(slot);
+  public void addPrivateJob(Duration duration, LocalTime latestEnd) {
+    unscheduledPrivateJobs.add(new Job(latestEnd, duration));
   }
+
+  /**
+   * @param roundtripTime the roundtripTime to set
+   */
+  public void setRoundtripTime(Duration roundtripTime) {
+    this.roundtripTime = roundtripTime;
+  }
+
 
   /**
    * Creates bids for the powerset of given deliveries, which are to be executed between an earliest
@@ -58,84 +71,69 @@ public class Truck {
    * @param latestComplete
    * @return List of bids
    */
-  public List<Bid> makeBidsForAllDeliveries(final List<Delivery> deliveries, long earliestStart,
-      long latestComplete) {
+  public List<Bid> makeBids(final List<Delivery> deliveries, LocalTime earliestStart,
+      LocalTime latestComplete) {
 
-    Set<Set<Long>> powerset = getPowerSet(deliveries);
+    Set<Set<Delivery>> powerset = getPowerSet(deliveries);
     List<Bid> bids = new LinkedList<>();
 
-    for (Set<Long> bundle : powerset) {
+    // earliest start time for this set of deliveries may be postponed due to already scheduled
+    // jobs.
+    if (!schedule.isEmpty()
+        && schedule.get(schedule.size() - 1).getScheduledEnd().isAfter(earliestStart)) {
+      earliestStart = schedule.get(schedule.size() - 1).getScheduledEnd();
+    }
+
+    for (Set<Delivery> bundle : powerset) {
       // Now we have a bundle containing one possible combination of deliveries
-      TreeSet<Long> sortedBundle = new TreeSet<Long>(bundle);
-      Bid newBid = createBid(sortedBundle, earliestStart, latestComplete, deliveries);
+      Bid newBid = createBid(bundle, earliestStart, latestComplete);
       bids.add(newBid);
     }
     return bids;
   }
 
   /**
-   * Creates a bid (valuations for a given set of requested deliveries).
+   * Creates a bid by scheduling a set of given jobs and then calculating a valuation, based on
+   * deviations of proposed delivery times to requested delivery times.
    * 
    * @param sortedBundle
    * @param earliestStart
    * @param latestComplete
-   * @param deliveries
    * @return
    */
-  private Bid createBid(TreeSet<Long> sortedBundle, long earliestStart, long latestComplete,
-      final List<Delivery> deliveries) {
+  private Bid createBid(Set<Delivery> bundle, LocalTime earliestStart, LocalTime latestComplete) {
 
-    // convert delivery dates to jobs
+
+    // convert deliveries to jobs
     LinkedList<Job> jobs = new LinkedList<>();
-    for (Long dueDate : sortedBundle) {
-      jobs.add(new Job(getDeliveryForRequestedTime(dueDate, deliveries), dueDate, roundtripTime));
+    HashMap<Integer, Delivery> deliveryMap = new HashMap<>();
+    for (Delivery delivery : bundle) {
+      // TODO what if truck needs less than a roundtrip time (stops halfway, e.g.)?
+      jobs.add(new Job(delivery, delivery.getRequestedTime(), roundtripTime));
+      deliveryMap.put(delivery.getId(), delivery);
     }
 
-    // insert blockers
-    for (Timeslot blocker : blockers) {
-      jobs.add(new Job(null, blocker.getLatestEnd(), blocker.getDuration()));
+    // insert "blockers", that is, unscheduled private jobs
+    for (Job privateJob : unscheduledPrivateJobs) {
+      jobs.add(privateJob);
     }
 
-    // sort the complete list by job target start date
-    Collections.sort(jobs, new Comparator<Job>() {
-      @Override
-      public int compare(Job j1, Job j2) {
-        return (int) (j1.getTargetedStart() - j2.getTargetedStart());
-      }
-    });
+    List<Job> bestSchedule = scheduler.scheduleJobs(jobs, earliestStart, latestComplete);
 
-    // TODO how to determine weights?
-    MaximumLateness alg = new MaximumLateness(2, 3);
-    List<Job> schedule = alg.scheduleJobs(jobs, earliestStart, latestComplete);
+    // No feasible schedule within given bounds
+    if (bestSchedule.isEmpty())
+      return null;
 
-    HashMap<Delivery, Long> bidmap = new HashMap<Delivery, Long>();
-
-    for (Job job : schedule) {
+    for (Job job : bestSchedule) {
       if (job.getDelivery() != null) {
-        job.getDelivery().setProposedTime(job.getScheduledEnd());
-        long valuation = job.getScheduledEnd() - job.getDue();
-        bidmap.put(job.getDelivery(), valuation);
+        Delivery delivery = deliveryMap.get(job.getDelivery().getId());
+        delivery.setProposedTime(job.getScheduledEnd());
       }
     }
-    Bid bid = new Bid(bidmap);
-    return bid;
+
+    return new Bid(deliveryMap.values());
   }
 
-  /**
-   * Returns a copy of a delivery contained in the given list which is due on a given time.
-   * 
-   * @param time
-   * @param deliveries
-   * @return
-   */
-  public Delivery getDeliveryForRequestedTime(long time, List<Delivery> deliveries) {
-    for (Delivery delivery : deliveries) {
-      if (delivery.getRequestedTime() == time) {
-        return delivery.clone();
-      }
-    }
-    return null;
-  }
 
   /**
    * Returns a set of all possible subsets of a given set / list.
@@ -143,69 +141,21 @@ public class Truck {
    * @param deliveries
    * @return
    */
-  private Set<Set<Long>> getPowerSet(List<Delivery> deliveries) {
-    Set<Long> deliveryDates = new HashSet<>();
+  private Set<Set<Delivery>> getPowerSet(List<Delivery> deliveries) {
+    Set<Delivery> deliverySet = new HashSet<>();
     for (Delivery delivery : deliveries) {
-      deliveryDates.add(delivery.getRequestedTime());
+      deliverySet.add(delivery);
     }
-    return PowerSet.powerSet(deliveryDates);
+    return PowerSet.powerSet(deliverySet);
   }
 
 
 
-  public class Timeslot {
-
-    private long duration;
-    private long latestEnd;
-
-    /**
-     * 
-     * @param duration
-     * @param latestEnd
-     */
-    public Timeslot(long duration, long latestEnd) {
-      this.duration = duration;
-      this.latestEnd = latestEnd;
-    }
-
-    /**
-     * @return the latestEnd
-     */
-    public long getLatestEnd() {
-      return latestEnd;
-    }
-
-    /**
-     * @param latestEnd the latestEnd to set
-     */
-    public void setLatestEnd(long latestEnd) {
-      this.latestEnd = latestEnd;
-    }
-
-    /**
-     * @return the duration
-     */
-    public long getDuration() {
-      return duration;
-    }
-
-    /**
-     * @param duration the duration to set
-     */
-    public void setDuration(long duration) {
-      this.duration = duration;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-      return "Timeslot [duration=" + duration + ", latestEnd=" + latestEnd + "]";
-    }
-
-
+  /**
+   * @return the id
+   */
+  public int getId() {
+    return id;
   }
+
 }

@@ -1,5 +1,6 @@
 package de.wnill.master.core.scheduling;
 
+import java.time.LocalTime;
 import java.util.List;
 
 import de.wnill.master.simulator.types.Job;
@@ -7,6 +8,6 @@ import de.wnill.master.simulator.types.Job;
 @FunctionalInterface
 public interface SchedulingAlgorithm {
 
-  public List<Job> scheduleJobs(List<Job> jobs, long earliestStart, long latestComplete);
+  public List<Job> scheduleJobs(List<Job> jobs, LocalTime earliestStart, LocalTime latestComplete);
 
 }

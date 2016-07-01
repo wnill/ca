@@ -47,7 +47,7 @@ public class NaiveSymetricPenaltiesTest {
         .ofMinutes(5)));
 
     NaiveSymetricPenalties alg = new NaiveSymetricPenalties();
-    List<Job> result = alg.scheduleJobs(jobList, 0, 50);
+    List<Job> result = alg.scheduleJobs(jobList, LocalTime.of(0, 0), LocalTime.of(0, 50));
 
     System.out.println("Best schedule: " + result);
   }

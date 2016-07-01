@@ -17,7 +17,8 @@ import de.wnill.master.simulator.types.Job;
 public class NaiveSymetricPenalties implements SchedulingAlgorithm {
 
   @Override
-  public List<Job> scheduleJobs(List<Job> originalList, long earliestStart, long latestComplete) {
+  public List<Job> scheduleJobs(List<Job> originalList, LocalTime earliestStart,
+      LocalTime latestComplete) {
 
     long lowestLateness = Long.MAX_VALUE;
     List<Job> bestSchedule = Collections.emptyList();

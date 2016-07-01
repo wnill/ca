@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.wnill.master.simulator.types.Delivery;
+
 public class PowerSet {
 
   /**
@@ -13,17 +15,17 @@ public class PowerSet {
    * @param originalSet
    * @return
    */
-  public static Set<Set<Long>> powerSet(Set<Long> originalSet) {
-    Set<Set<Long>> sets = new HashSet<Set<Long>>();
+  public static Set<Set<Delivery>> powerSet(Set<Delivery> originalSet) {
+    Set<Set<Delivery>> sets = new HashSet<Set<Delivery>>();
     if (originalSet.isEmpty()) {
-      sets.add(new HashSet<Long>());
+      sets.add(new HashSet<Delivery>());
       return sets;
     }
-    List<Long> list = new ArrayList<Long>(originalSet);
-    Long head = list.get(0);
-    Set<Long> rest = new HashSet<Long>(list.subList(1, list.size()));
-    for (Set<Long> set : powerSet(rest)) {
-      Set<Long> newSet = new HashSet<Long>();
+    List<Delivery> list = new ArrayList<>(originalSet);
+    Delivery head = list.get(0);
+    Set<Delivery> rest = new HashSet<>(list.subList(1, list.size()));
+    for (Set<Delivery> set : powerSet(rest)) {
+      Set<Delivery> newSet = new HashSet<>();
       newSet.add(head);
       newSet.addAll(set);
       sets.add(newSet);
@@ -31,5 +33,4 @@ public class PowerSet {
     }
     return sets;
   }
-
 }
