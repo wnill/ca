@@ -52,7 +52,11 @@ public class Paver {
       nextDeliveryTime = nextDeliveryTime.plus(scenario.getOptimalDeliveryInterval());
     }
 
+    System.out.println("Requested deliveries: " + pendingDeliveries);
+
     for (Truck truck : trucks) {
+
+      System.out.println("Requesting schedule for truck " + truck.getId());
       List<Bid> bids =
           truck.makeBids(requests, Clock.getInstance().getCurrentTime(), scenario.getEndTime());
       System.out.println(bids);

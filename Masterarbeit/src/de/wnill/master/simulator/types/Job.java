@@ -158,5 +158,11 @@ public class Job {
         + ", delivery=" + delivery + ", id=" + id + "]";
   }
 
+  public Job clone() {
+    Job newJob = new Job(delivery, due, duration);
+    newJob.setId(id);
+    newJob.setScheduledStart(scheduledStart);
+    return newJob;
+  }
 
 }

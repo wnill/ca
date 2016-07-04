@@ -5,10 +5,13 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
 import de.wnill.master.simulator.types.Job;
+import de.wnill.master.simulator.utils.JobComparator;
+import de.wnill.master.simulator.utils.ScheduleLogger;
 
 /**
  * Algorithm as proposed by Garey, Tarjan and Wilfong (1988).
@@ -24,20 +27,23 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
     List<Job> bestSchedule = Collections.emptyList();
 
     List<List<Job>> allPermutations = generatePermutations(originalList);
-    System.out.println("Generated " + allPermutations.size() + " permutations");
 
     for (List<Job> jobList : allPermutations) {
       if (!jobList.isEmpty()) {
         List<Job> schedule = findOptimalJobTimes(jobList);
         long lateness = calculateLatenessSum(schedule);
         if (lateness < lowestLateness) {
-          bestSchedule = schedule;
+          bestSchedule = new LinkedList<Job>();
+          for (Job job : schedule) {
+            bestSchedule.add(job.clone());
+          }
           lowestLateness = lateness;
-
-          System.out.println("Total lateness: " + lateness + " of Schedule " + schedule);
         }
       }
     }
+
+    Collections.sort(bestSchedule, new JobComparator());
+    ScheduleLogger.logSchedule(bestSchedule, lowestLateness);
 
     return bestSchedule;
   }
@@ -186,12 +192,11 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
     for (Job job : schedule) {
       totalLateness +=
           Math.abs(Duration.between(job.getScheduledEnd(), job.getDelivery().getRequestedTime())
-              .getSeconds()) / 60;
+              .toMinutes());
     }
 
     return totalLateness;
   }
-
 
   /**
    * Creates all permutations of given list.
