@@ -4,7 +4,9 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import de.wnill.master.simulator.Truck;
 import de.wnill.master.simulator.types.Delivery;
+import de.wnill.master.simulator.types.Job;
 
 /**
  * Models a "bid" given by a truck for a set of deliveries by specifying estimated delivery dates.
@@ -12,6 +14,8 @@ import de.wnill.master.simulator.types.Delivery;
 public class Bid {
 
   private int id;
+
+  private Truck truck;
 
   private Duration maxLateness = Duration.ZERO;
 
@@ -21,8 +25,9 @@ public class Bid {
 
   private LinkedList<Delivery> deliveries = new LinkedList<>();
 
+  private LinkedList<Job> unproductiveJobs = new LinkedList<>();
 
-  public Bid(Collection<Delivery> deliveries) {
+  public Bid(Collection<Delivery> deliveries, Collection<Job> unproductiveJobs, Truck truck) {
     for (Delivery delivery : deliveries) {
       this.deliveries.add(delivery.clone());
       Duration deviation =
@@ -33,6 +38,11 @@ public class Bid {
       }
     }
 
+    for (Job job : unproductiveJobs) {
+      this.unproductiveJobs.add(job);
+    }
+
+    this.truck = truck;
     id = idCounter;
     idCounter++;
   }
@@ -43,6 +53,14 @@ public class Bid {
    */
   public int getId() {
     return id;
+  }
+
+
+  /**
+   * @return the truck
+   */
+  public Truck getTruck() {
+    return truck;
   }
 
 
@@ -67,6 +85,14 @@ public class Bid {
    */
   public LinkedList<Delivery> getDeliveries() {
     return deliveries;
+  }
+
+
+  /**
+   * @return the unproductiveJobs
+   */
+  public LinkedList<Job> getUnproductiveJobs() {
+    return unproductiveJobs;
   }
 
 

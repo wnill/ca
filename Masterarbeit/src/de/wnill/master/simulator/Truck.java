@@ -100,24 +100,31 @@ public class Truck {
    * deviations of proposed delivery times to requested delivery times.
    * 
    * @param sortedBundle
-   * @param earliestStart
-   * @param latestComplete
+   * @param earliestStart early bound - deliveries before are invalid
+   * @param latestComplete late bound - deliveries after are invalid
    * @return
    */
   private Bid createBid(Set<Delivery> bundle, LocalTime earliestStart, LocalTime latestComplete) {
 
     // convert deliveries to jobs
     LinkedList<Job> jobs = new LinkedList<>();
+    // maps delivery id -> delivery
     HashMap<Integer, Delivery> deliveryMap = new HashMap<>();
+    LocalTime lastDue = LocalTime.of(0, 0);
     for (Delivery delivery : bundle) {
       // TODO what if truck needs less than a roundtrip time (stops halfway, e.g.)?
       jobs.add(new Job(delivery, delivery.getRequestedTime(), roundtripTime));
       deliveryMap.put(delivery.getId(), delivery);
+      if (delivery.getRequestedTime().isAfter(lastDue)) {
+        lastDue = delivery.getRequestedTime();
+      }
     }
 
     // insert "blockers", that is, unscheduled private jobs
     for (Job privateJob : unscheduledPrivateJobs) {
-      jobs.add(privateJob);
+      if (privateJob.getDue().isBefore(lastDue)) {
+        jobs.add(privateJob);
+      }
     }
 
     List<Job> bestSchedule = scheduler.scheduleJobs(jobs, earliestStart, latestComplete);
@@ -126,14 +133,42 @@ public class Truck {
     if (bestSchedule.isEmpty())
       return null;
 
+    LinkedList<Job> unproductiveJobs = new LinkedList<>();
     for (Job job : bestSchedule) {
       if (job.getDelivery() != null) {
         Delivery delivery = deliveryMap.get(job.getDelivery().getId());
         delivery.setProposedTime(job.getScheduledEnd());
+      } else {
+        unproductiveJobs.add(job);
       }
     }
 
-    return new Bid(deliveryMap.values());
+    return new Bid(deliveryMap.values(), unproductiveJobs, this);
+  }
+
+  /**
+   * Assigns the deliveries specified in given bid to this truck.
+   * 
+   * @param bid
+   */
+  public void awardBid(Bid bid) {
+    schedule.addAll(bid.getUnproductiveJobs());
+    for (Delivery delivery : bid.getDeliveries()) {
+      schedule.add(convertDeliveryToJob(delivery));
+    }
+  }
+
+
+
+  /**
+   * 
+   * @param delivery
+   * @return
+   */
+  private Job convertDeliveryToJob(Delivery delivery) {
+    Job job = new Job(delivery, delivery.getRequestedTime(), roundtripTime);
+    job.setScheduledStart(delivery.getProposedTime().minus(roundtripTime));
+    return job;
   }
 
 

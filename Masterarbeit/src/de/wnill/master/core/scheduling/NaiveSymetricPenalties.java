@@ -30,7 +30,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
 
     for (List<Job> jobList : allPermutations) {
       if (!jobList.isEmpty()) {
-        List<Job> schedule = findOptimalJobTimes(jobList);
+        List<Job> schedule = findOptimalJobTimes(jobList, earliestStart, latestComplete);
         long lateness = calculateLatenessSum(schedule);
         if (lateness < lowestLateness) {
           bestSchedule = new LinkedList<Job>();
@@ -49,7 +49,8 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
   }
 
 
-  protected List<Job> findOptimalJobTimes(List<Job> jobList) {
+  protected List<Job> findOptimalJobTimes(List<Job> jobList, LocalTime earliestStart,
+      LocalTime latestComplete) {
     // block index
     int t = 0;
     // denotes the index of the first job in the block which is indicated by array index
@@ -176,6 +177,26 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
       }
     }
 
+    // Finally, adjust by earliest and latest allowed completion times
+    if (jobList.get(0).getScheduledStart().isBefore(earliestStart)) {
+      Duration delta = Duration.between(jobList.get(0).getScheduledStart(), earliestStart);
+      for (Job job : jobList) {
+        job.setScheduledStart(job.getScheduledStart().plus(delta));
+      }
+    }
+
+    if (jobList.get(jobList.size() - 1).getScheduledEnd().isAfter(latestComplete)) {
+      Duration delta =
+          Duration.between(latestComplete, jobList.get(jobList.size() - 1).getScheduledEnd());
+      for (Job job : jobList) {
+        job.setScheduledStart(job.getScheduledStart().plus(delta));
+      }
+    }
+
+    // If it does not fit within given time bounds, schedule is infeasible
+    if (jobList.get(0).getScheduledStart().isBefore(earliestStart)) {
+      return Collections.EMPTY_LIST;
+    }
 
     return jobList;
   }
@@ -187,6 +208,11 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
    * @return
    */
   public long calculateLatenessSum(List<Job> schedule) {
+
+    if (schedule.isEmpty()) {
+      return Long.MAX_VALUE;
+    }
+
     long totalLateness = 0;
 
     for (Job job : schedule) {

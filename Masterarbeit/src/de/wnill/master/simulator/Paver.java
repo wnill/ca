@@ -1,11 +1,13 @@
 package de.wnill.master.simulator;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import de.wnill.master.core.Bid;
 import de.wnill.master.simulator.types.Delivery;
+import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
 
 public class Paver {
@@ -54,12 +56,47 @@ public class Paver {
 
     System.out.println("Requested deliveries: " + pendingDeliveries);
 
-    for (Truck truck : trucks) {
+    if (scenario.getOrderType().equals(OrderType.BUNDLE)) {
+      orderDeliveries(trucks, requests);
+    } else if (scenario.getOrderType().equals(OrderType.SEQUENTIAL)) {
+      for (Delivery request : requests) {
+        LinkedList<Delivery> oneElementList = new LinkedList<>();
+        oneElementList.add(request);
+        orderDeliveries(trucks, oneElementList);
+      }
+    }
+  }
 
+  /**
+   * Collects the best bids for a given set of deliveries and awards the winning trucks.
+   * 
+   * @param trucks
+   * @param requests
+   */
+  private void orderDeliveries(List<Truck> trucks, LinkedList<Delivery> requests) {
+
+    // Collect bids
+    List<Bid> bids = new ArrayList<>();
+    for (Truck truck : trucks) {
       System.out.println("Requesting schedule for truck " + truck.getId());
-      List<Bid> bids =
-          truck.makeBids(requests, Clock.getInstance().getCurrentTime(), scenario.getEndTime());
+      bids.addAll(truck.makeBids(requests, Clock.getInstance().getCurrentTime(),
+          scenario.getEndTime()));
       System.out.println(bids);
+    }
+
+    // Find best bid (only for sequential ordering)
+    Bid bestBid = null;
+    for (Bid bid : bids) {
+      if (bid != null
+          && (bestBid == null || bid.getSumLateness().compareTo(bestBid.getSumLateness()) < 0)) {
+        bestBid = bid;
+      }
+    }
+
+    // Award
+    if (bestBid != null) {
+      bestBid.getTruck().awardBid(bestBid);
+      System.out.println("Awarded truck " + bestBid.getTruck().getId() + " with bid " + bestBid);
     }
 
   }
