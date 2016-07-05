@@ -33,7 +33,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
         List<Job> schedule = findOptimalJobTimes(jobList, earliestStart, latestComplete);
         long lateness = calculateLatenessSum(schedule);
         if (lateness < lowestLateness) {
-          bestSchedule = new LinkedList<Job>();
+          bestSchedule = new LinkedList<>();
           for (Job job : schedule) {
             bestSchedule.add(job.clone());
           }

@@ -1,12 +1,10 @@
-package de.wnill.master.core;
+package de.wnill.master.simulator.types;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedList;
 
 import de.wnill.master.simulator.Truck;
-import de.wnill.master.simulator.types.Delivery;
-import de.wnill.master.simulator.types.Job;
 
 /**
  * Models a "bid" given by a truck for a set of deliveries by specifying estimated delivery dates.

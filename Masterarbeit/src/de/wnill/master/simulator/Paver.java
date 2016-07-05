@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.wnill.master.core.Bid;
+import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;

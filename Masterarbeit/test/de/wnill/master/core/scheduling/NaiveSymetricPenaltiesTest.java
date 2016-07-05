@@ -27,7 +27,7 @@ public class NaiveSymetricPenaltiesTest {
         .ofMinutes(3)));
 
     NaiveSymetricPenalties alg = new NaiveSymetricPenalties();
-    List<Job> result = alg.findOptimalJobTimes(jobList);
+    List<Job> result = alg.findOptimalJobTimes(jobList, LocalTime.of(0, 0), LocalTime.of(1, 0));
 
     System.out.println(result);
 

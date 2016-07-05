@@ -9,9 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import de.wnill.master.core.Bid;
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.utils.PowerSet;
+import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
 
