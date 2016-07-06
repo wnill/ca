@@ -5,9 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import de.wnill.master.simulator.types.Delivery;
-
-public class PowerSet {
+public class PowerSet<T> {
 
   /**
    * Returns a set of all possible subsets of a given set.
@@ -15,17 +13,17 @@ public class PowerSet {
    * @param originalSet
    * @return
    */
-  public static Set<Set<Delivery>> powerSet(Set<Delivery> originalSet) {
-    Set<Set<Delivery>> sets = new HashSet<Set<Delivery>>();
+  public Set<Set<T>> powerSet(Set<T> originalSet) {
+    Set<Set<T>> sets = new HashSet<>();
     if (originalSet.isEmpty()) {
-      sets.add(new HashSet<Delivery>());
+      sets.add(new HashSet<T>());
       return sets;
     }
-    List<Delivery> list = new ArrayList<>(originalSet);
-    Delivery head = list.get(0);
-    Set<Delivery> rest = new HashSet<>(list.subList(1, list.size()));
-    for (Set<Delivery> set : powerSet(rest)) {
-      Set<Delivery> newSet = new HashSet<>();
+    List<T> list = new ArrayList<>(originalSet);
+    T head = list.get(0);
+    Set<T> rest = new HashSet<>(list.subList(1, list.size()));
+    for (Set<T> set : powerSet(rest)) {
+      Set<T> newSet = new HashSet<>();
       newSet.add(head);
       newSet.addAll(set);
       sets.add(newSet);

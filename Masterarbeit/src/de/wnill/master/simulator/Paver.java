@@ -2,8 +2,10 @@ package de.wnill.master.simulator;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
@@ -84,20 +86,46 @@ public class Paver {
       System.out.println(bids);
     }
 
+    awardWinningBids(findWinningBids(bids, requests));
+  }
+
+  /**
+   * Decides on which bids to award deliveries from the given set of bids.
+   * 
+   * @param bids
+   * @return
+   */
+  private Set<Bid> findWinningBids(List<Bid> bids, List<Delivery> requests) {
+    HashSet<Bid> bestBids = new HashSet<>();
     // Find best bid (only for sequential ordering)
-    Bid bestBid = null;
-    for (Bid bid : bids) {
-      if (bid != null
-          && (bestBid == null || bid.getSumLateness().compareTo(bestBid.getSumLateness()) < 0)) {
-        bestBid = bid;
+    if (scenario.getOrderType().equals(OrderType.SEQUENTIAL)) {
+      Bid bestBid = null;
+      for (Bid bid : bids) {
+        if (bid != null
+            && (bestBid == null || bid.getSumLateness().compareTo(bestBid.getSumLateness()) < 0)) {
+          bestBid = bid;
+        }
+      }
+      bestBids.add(bestBid);
+    } else if (scenario.getOrderType().equals(OrderType.BUNDLE)) {
+      bestBids.addAll(scenario.getWinnerDeterminationAlgorithm().determineWinners(bids, requests));
+    }
+    return bestBids;
+  }
+
+  /**
+   * For each of the winning bids orders the owning truck to carry out the delivery, respectively.
+   * 
+   * @param winningBids
+   */
+  private void awardWinningBids(Set<Bid> winningBids) {
+    if (winningBids != null) {
+      for (Bid bid : winningBids) {
+        if (bid != null) {
+          bid.getTruck().awardBid(bid);
+          System.out.println("Awarded truck " + bid.getTruck().getId() + " with bid " + bid);
+        }
       }
     }
-
-    // Award
-    if (bestBid != null) {
-      bestBid.getTruck().awardBid(bestBid);
-      System.out.println("Awarded truck " + bestBid.getTruck().getId() + " with bid " + bestBid);
-    }
-
   }
 }

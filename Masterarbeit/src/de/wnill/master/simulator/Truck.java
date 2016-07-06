@@ -183,7 +183,8 @@ public class Truck {
     for (Delivery delivery : deliveries) {
       deliverySet.add(delivery);
     }
-    return PowerSet.powerSet(deliverySet);
+    PowerSet<Delivery> ps = new PowerSet<>();
+    return ps.powerSet(deliverySet);
   }
 
 

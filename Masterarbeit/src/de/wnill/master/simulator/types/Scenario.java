@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
+import de.wnill.master.core.wdp.WinnerDeterminationAlgorithm;
 
 public class Scenario {
 
@@ -39,6 +40,7 @@ public class Scenario {
   /** how many deliveries may be ordered at most at any given time */
   private int orderAheadMaximum;
 
+  private WinnerDeterminationAlgorithm winnerDeterminationAlgorithm;
 
 
   /**
@@ -167,6 +169,21 @@ public class Scenario {
    */
   public void setSchedulingAlgorithm(SchedulingAlgorithm schedulingAlgorithm) {
     this.schedulingAlgorithm = schedulingAlgorithm;
+  }
+
+  /**
+   * @return the winnerDeterminationAlgorithm
+   */
+  public WinnerDeterminationAlgorithm getWinnerDeterminationAlgorithm() {
+    return winnerDeterminationAlgorithm;
+  }
+
+  /**
+   * @param winnerDeterminationAlgorithm the winnerDeterminationAlgorithm to set
+   */
+  public void setWinnerDeterminationAlgorithm(
+      WinnerDeterminationAlgorithm winnerDeterminationAlgorithm) {
+    this.winnerDeterminationAlgorithm = winnerDeterminationAlgorithm;
   }
 
   /**

@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 
 import de.wnill.master.core.scheduling.NaiveSymetricPenalties;
+import de.wnill.master.core.wdp.NaiveExhaustiveEnumeration;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
@@ -13,6 +14,22 @@ public class Simulator {
   public static void main(String[] args) {
 
     // Configure BUNDLE scenario
+    Scenario scenario = new Scenario();
+    scenario.setEndTime(LocalTime.of(14, 0));
+    scenario.setFirstDockingTime(LocalTime.of(12, 0));
+    scenario.setOffloadingDuration(Duration.ofMinutes(5));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
+    scenario.setOrderAheadMaximum(3);
+    scenario.setOrderAheadMinimum(3);
+    scenario.setOrderType(OrderType.BUNDLE);
+    scenario.setRoundtripTime(Duration.ofMinutes(20));
+    scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
+    scenario.setWinnerDeterminationAlgorithm(new NaiveExhaustiveEnumeration());
+    scenario.setStartTime(LocalTime.of(11, 40));
+    scenario.setTruckCount(2);
+
+
+    // Configure SEQUENTIAL scenario
     // Scenario scenario = new Scenario();
     // scenario.setEndTime(LocalTime.of(14, 0));
     // scenario.setFirstDockingTime(LocalTime.of(12, 0));
@@ -20,26 +37,11 @@ public class Simulator {
     // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
     // scenario.setOrderAheadMaximum(5);
     // scenario.setOrderAheadMinimum(5);
-    // scenario.setOrderType(OrderType.BUNDLE);
+    // scenario.setOrderType(OrderType.SEQUENTIAL);
     // scenario.setRoundtripTime(Duration.ofMinutes(20));
     // scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
     // scenario.setStartTime(LocalTime.of(11, 40));
     // scenario.setTruckCount(2);
-
-
-    // Configure SEQUENTIAL scenario
-    Scenario scenario = new Scenario();
-    scenario.setEndTime(LocalTime.of(14, 0));
-    scenario.setFirstDockingTime(LocalTime.of(12, 0));
-    scenario.setOffloadingDuration(Duration.ofMinutes(5));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
-    scenario.setOrderAheadMaximum(5);
-    scenario.setOrderAheadMinimum(5);
-    scenario.setOrderType(OrderType.SEQUENTIAL);
-    scenario.setRoundtripTime(Duration.ofMinutes(20));
-    scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
-    scenario.setStartTime(LocalTime.of(11, 40));
-    scenario.setTruckCount(2);
 
 
     Engine engine = new Engine(new Condition() {
