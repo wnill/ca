@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 
 import de.wnill.master.core.scheduling.NaiveSymetricPenalties;
-import de.wnill.master.core.wdp.NaiveExhaustiveEnumeration;
+import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
@@ -24,7 +24,7 @@ public class Simulator {
     scenario.setOrderType(OrderType.BUNDLE);
     scenario.setRoundtripTime(Duration.ofMinutes(20));
     scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
-    scenario.setWinnerDeterminationAlgorithm(new NaiveExhaustiveEnumeration());
+    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
     scenario.setStartTime(LocalTime.of(11, 40));
     scenario.setTruckCount(2);
 

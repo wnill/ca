@@ -90,7 +90,9 @@ public class Truck {
     for (Set<Delivery> bundle : powerset) {
       // Now we have a bundle containing one possible combination of deliveries
       Bid newBid = createBid(bundle, earliestStart, latestComplete);
-      bids.add(newBid);
+      if (newBid != null) {
+        bids.add(newBid);
+      }
     }
     return bids;
   }

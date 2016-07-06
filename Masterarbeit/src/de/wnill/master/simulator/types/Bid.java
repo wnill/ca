@@ -1,6 +1,7 @@
 package de.wnill.master.simulator.types;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -23,11 +24,14 @@ public class Bid {
 
   private LinkedList<Delivery> deliveries = new LinkedList<>();
 
+  private ArrayList<Integer> deliveryIds = new ArrayList<>();
+
   private LinkedList<Job> unproductiveJobs = new LinkedList<>();
 
   public Bid(Collection<Delivery> deliveries, Collection<Job> unproductiveJobs, Truck truck) {
     for (Delivery delivery : deliveries) {
       this.deliveries.add(delivery.clone());
+      deliveryIds.add(delivery.getId());
       Duration deviation =
           Duration.between(delivery.getRequestedTime(), delivery.getProposedTime()).abs();
       sumLateness = sumLateness.plus(deviation);
@@ -51,6 +55,14 @@ public class Bid {
    */
   public int getId() {
     return id;
+  }
+
+
+  /**
+   * @return the deliveryIds
+   */
+  public ArrayList<Integer> getDeliveryIds() {
+    return deliveryIds;
   }
 
 
