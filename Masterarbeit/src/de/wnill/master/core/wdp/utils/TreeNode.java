@@ -9,17 +9,23 @@ public class TreeNode {
 
   private int id;
 
+  private int bidId;
+
   private TreeNode parent;
 
   private List<Integer> deliveryIds;
 
   private long valuation;
 
+  private int truckId;
+
   private List<TreeNode> children;
 
-  public TreeNode(List<Integer> deliveryIds, long valuation) {
+  public TreeNode(int bidId, List<Integer> deliveryIds, long valuation, int truckId) {
+    this.bidId = bidId;
     this.deliveryIds = deliveryIds;
     this.valuation = valuation;
+    this.truckId = truckId;
     id = idCounter++;
   }
 
@@ -28,6 +34,20 @@ public class TreeNode {
    */
   public int getId() {
     return id;
+  }
+
+  /**
+   * @return the truckId
+   */
+  public int getTruckId() {
+    return truckId;
+  }
+
+  /**
+   * @return the bidId
+   */
+  public int getBidId() {
+    return bidId;
   }
 
   public void addChild(TreeNode child) {
@@ -53,6 +73,13 @@ public class TreeNode {
   }
 
   /**
+   * @return the valuation
+   */
+  public long getValuation() {
+    return valuation;
+  }
+
+  /**
    * @return the children
    */
   public List<TreeNode> getChildren() {
@@ -74,15 +101,16 @@ public class TreeNode {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("TreeNode [parent=");
+    sb.append("TreeNode [id=").append(id).append(", parent=");
     if (parent == null)
       sb.append("none");
     else
       sb.append(parent.getId());
-    sb.append(", deliveryIds=").append(deliveryIds).append(", valuation=").append(valuation)
-        .append(", children=");
+    sb.append(", bidId=").append(bidId).append(", deliveryIds=").append(deliveryIds)
+        .append(", valuation=").append(valuation).append(", children=");
     if (children != null && !children.isEmpty()) {
       for (TreeNode child : children) {
+        sb.append("\n");
         sb.append(child);
       }
     } else {

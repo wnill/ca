@@ -19,8 +19,8 @@ public class Simulator {
     scenario.setFirstDockingTime(LocalTime.of(12, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(5));
     scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
-    scenario.setOrderAheadMaximum(3);
-    scenario.setOrderAheadMinimum(3);
+    scenario.setOrderAheadMaximum(6);
+    scenario.setOrderAheadMinimum(6);
     scenario.setOrderType(OrderType.BUNDLE);
     scenario.setRoundtripTime(Duration.ofMinutes(20));
     scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
