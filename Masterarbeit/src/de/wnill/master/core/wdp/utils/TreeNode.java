@@ -21,6 +21,8 @@ public class TreeNode {
 
   private List<TreeNode> children;
 
+  private boolean valid = true;
+
   public TreeNode(int bidId, List<Integer> deliveryIds, long valuation, int truckId) {
     this.bidId = bidId;
     this.deliveryIds = deliveryIds;
@@ -91,6 +93,20 @@ public class TreeNode {
    */
   public List<Integer> getDeliveryIds() {
     return deliveryIds;
+  }
+
+  /**
+   * @param valid the valid to set
+   */
+  public void setValid(boolean valid) {
+    this.valid = valid;
+  }
+
+  /**
+   * @return the valid
+   */
+  public boolean isValid() {
+    return valid;
   }
 
   /*

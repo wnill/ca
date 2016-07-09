@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import de.wnill.master.core.wdp.utils.TreeNode;
@@ -36,6 +37,8 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
 
     searchTree = constructSearchTree(bids, deliveries);
     System.out.println(searchTree);
+
+    purgeInvalidNodes(searchTree);
 
     findOptimalBidSet(searchTree, 0);
 
@@ -131,8 +134,8 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
 
       // Allow only one bid per truck in the winner set. This is only due to the bid set being
       // exhaustive!
-      // if (truckIds.contains(bid.getTruck().getId()))
-      // continue;
+      if (truckIds.contains(bid.getTruck().getId()))
+        continue;
 
 
       while (listIndex < deliveryIds.size() && covered.contains(deliveryIds.get(listIndex))) {
@@ -165,7 +168,51 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
       for (TreeNode child : oneNode.getChildren()) {
         constructChildren(bids, newListIndex, child);
       }
+    } else {
+      // This is a leaf node. Check if the path up to here is valid. If not, purge this particular
+      // path.
+      if (!covered.containsAll(deliveryIds)) {
+        oneNode.setValid(false);
+        parent = oneNode.getParent();
+
+        while (parent != null) {
+          int validCounter = 0;
+
+          for (TreeNode child : parent.getChildren()) {
+            if (child.isValid()) {
+              validCounter++;
+            }
+          }
+
+          if (validCounter == 0) {
+            parent.setValid(false);
+          }
+
+          parent = parent.getParent();
+        }
+      }
     }
 
+  }
+
+  /**
+   * Remove all nodes from a tree which are flagged as invalid.
+   * 
+   * @param startNode
+   */
+  private void purgeInvalidNodes(TreeNode startNode) {
+
+    if (startNode == null || startNode.getChildren() == null || startNode.getChildren().isEmpty())
+      return;
+
+    Iterator<TreeNode> it = startNode.getChildren().iterator();
+    while (it.hasNext()) {
+      TreeNode node = it.next();
+      if (!node.isValid()) {
+        it.remove();
+      } else {
+        purgeInvalidNodes(node);
+      }
+    }
   }
 }

@@ -34,7 +34,8 @@ public class TreeVisualisation extends JFrame {
 
     for (TreeNode child : searchTree.getChildren()) {
       mxICell childCell =
-          (mxICell) graph.insertVertex(parent, null, child.getDeliveryIds(), 0, 0, 30, 30);
+          (mxICell) graph.insertVertex(parent, null,
+              child.getTruckId() + ": " + child.getDeliveryIds(), 0, 0, 30, 30);
       graph.insertEdge(parent, null, "", root, childCell);
       if (child.getChildren() != null && !child.getChildren().isEmpty()) {
         addChildCell(child, childCell);
@@ -52,7 +53,8 @@ public class TreeVisualisation extends JFrame {
   private void addChildCell(TreeNode parentNode, mxICell parentCell) {
     for (TreeNode child : parentNode.getChildren()) {
       mxICell childCell =
-          (mxICell) graph.insertVertex(parent, null, child.getDeliveryIds(), 0, 0, 30, 30);
+          (mxICell) graph.insertVertex(parent, null,
+              child.getTruckId() + ": " + child.getDeliveryIds(), 0, 0, 30, 30);
       graph.insertEdge(parent, null, "", parentCell, childCell);
       if (child.getChildren() != null && !child.getChildren().isEmpty()) {
         addChildCell(child, childCell);
