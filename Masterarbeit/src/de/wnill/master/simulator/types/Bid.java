@@ -40,8 +40,21 @@ public class Bid {
       }
     }
 
+    // Set a prohibitive penalty for tardiness, "normal" penalty for earliness
     for (Job job : unproductiveJobs) {
       this.unproductiveJobs.add(job);
+      Duration deviation = Duration.between(job.getDue(), job.getScheduledEnd());
+
+      if (deviation.isNegative()) {
+        deviation = deviation.abs();
+      } else {
+        deviation = deviation.multipliedBy(100);
+      }
+
+      sumLateness = sumLateness.plus(deviation);
+      if (deviation.compareTo(maxLateness) > 0) {
+        maxLateness = deviation;
+      }
     }
 
     this.truck = truck;
@@ -114,7 +127,7 @@ public class Bid {
   @Override
   public String toString() {
     return "Bid [id=" + id + ", maxLateness=" + maxLateness + ", sumLateness=" + sumLateness
-        + ", deliveries=" + deliveries + "]";
+        + ", deliveries=" + deliveries + ", unproductive=[" + unproductiveJobs + "]";
   }
 
 

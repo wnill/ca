@@ -216,9 +216,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
     long totalLateness = 0;
 
     for (Job job : schedule) {
-      totalLateness +=
-          Math.abs(Duration.between(job.getScheduledEnd(), job.getDelivery().getRequestedTime())
-              .toMinutes());
+      totalLateness += Math.abs(Duration.between(job.getScheduledEnd(), job.getDue()).toMinutes());
     }
 
     return totalLateness;

@@ -21,7 +21,7 @@ public class Simulator {
     scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
     scenario.setOrderAheadMaximum(6);
     scenario.setOrderAheadMinimum(6);
-    scenario.setOrderType(OrderType.BUNDLE);
+    scenario.setOrderType(OrderType.SEQUENTIAL);
     scenario.setRoundtripTime(Duration.ofMinutes(20));
     scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
     scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
@@ -35,8 +35,8 @@ public class Simulator {
     // scenario.setFirstDockingTime(LocalTime.of(12, 0));
     // scenario.setOffloadingDuration(Duration.ofMinutes(5));
     // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
-    // scenario.setOrderAheadMaximum(5);
-    // scenario.setOrderAheadMinimum(5);
+    // scenario.setOrderAheadMaximum(6);
+    // scenario.setOrderAheadMinimum(6);
     // scenario.setOrderType(OrderType.SEQUENTIAL);
     // scenario.setRoundtripTime(Duration.ofMinutes(20));
     // scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());

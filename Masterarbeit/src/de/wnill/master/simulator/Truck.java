@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,8 @@ public class Truck {
   public Truck(int id, SchedulingAlgorithm scheduler) {
     this.id = id;
     this.scheduler = scheduler;
+
+    addPrivateJob(Duration.ofMinutes(10), LocalTime.of(12, 30));
   }
 
 
@@ -124,7 +127,7 @@ public class Truck {
 
     // insert "blockers", that is, unscheduled private jobs
     for (Job privateJob : unscheduledPrivateJobs) {
-      if (privateJob.getDue().isBefore(lastDue)) {
+      if (privateJob.getDue().equals(lastDue) || privateJob.getDue().isBefore(lastDue)) {
         jobs.add(privateJob);
       }
     }
@@ -154,13 +157,24 @@ public class Truck {
    * @param bid
    */
   public void awardBid(Bid bid) {
-    schedule.addAll(bid.getUnproductiveJobs());
+
+    for (Job job : bid.getUnproductiveJobs()) {
+      schedule.add(job);
+
+      Iterator<Job> it = unscheduledPrivateJobs.iterator();
+      while (it.hasNext()) {
+        Job unscheduled = it.next();
+        if (unscheduled.getDue().equals(job.getDue())
+            && unscheduled.getDuration().equals(job.getDuration())) {
+          it.remove();
+        }
+      }
+    }
+
     for (Delivery delivery : bid.getDeliveries()) {
       schedule.add(convertDeliveryToJob(delivery));
     }
   }
-
-
 
   /**
    * 
