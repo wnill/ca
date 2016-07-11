@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import de.wnill.master.core.scheduling.viz.ScheduleVisualizer;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.OrderType;
@@ -67,6 +68,10 @@ public class Paver {
         orderDeliveries(trucks, oneElementList);
       }
     }
+
+    // TODO put this in the right place
+
+    new ScheduleVisualizer(trucks);
   }
 
   /**

@@ -159,6 +159,7 @@ public class Truck {
   public void awardBid(Bid bid) {
 
     for (Job job : bid.getUnproductiveJobs()) {
+      job.setId("B");
       schedule.add(job);
 
       Iterator<Job> it = unscheduledPrivateJobs.iterator();
@@ -184,6 +185,7 @@ public class Truck {
   private Job convertDeliveryToJob(Delivery delivery) {
     Job job = new Job(delivery, delivery.getRequestedTime(), roundtripTime);
     job.setScheduledStart(delivery.getProposedTime().minus(roundtripTime));
+    job.setId("D" + delivery.getId());
     return job;
   }
 
@@ -203,6 +205,14 @@ public class Truck {
     return ps.powerSet(deliverySet);
   }
 
+
+
+  /**
+   * @return the schedule
+   */
+  public ArrayList<Job> getSchedule() {
+    return schedule;
+  }
 
 
   /**
