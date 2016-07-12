@@ -12,6 +12,20 @@ import de.wnill.master.simulator.types.Scenario;
 
 public class Simulator {
 
+  public void runScenario(Scenario scenario) {
+
+    Engine engine = new Engine(new Condition() {
+
+      @Override
+      public boolean isMet() {
+        // TODO Auto-generated method stub
+        return false;
+      }
+    }, scenario);
+    engine.run();
+  }
+
+
   public static void main(String[] args) {
 
     // Configure BUNDLE scenario

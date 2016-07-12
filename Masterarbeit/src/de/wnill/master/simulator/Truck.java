@@ -52,7 +52,7 @@ public class Truck {
     this.valuator = valuator;
 
     // TODO move to Simulator
-    addPrivateJob(Duration.ofMinutes(20), LocalTime.of(12, 30));
+    addPrivateJob(Duration.ofMinutes(20), LocalTime.of(12, 40));
   }
 
 
@@ -139,7 +139,8 @@ public class Truck {
 
     // insert "blockers", that is, unscheduled private jobs
     for (Job privateJob : unscheduledPrivateJobs) {
-      if (privateJob.getDue().equals(lastDue) || privateJob.getDue().isBefore(lastDue)
+      if (privateJob.getTargetedStart().equals(lastDue)
+          || privateJob.getTargetedStart().isBefore(lastDue)
           || earliestStart.plus(privateJob.getDuration()).equals(privateJob.getDue())
           || earliestStart.plus(privateJob.getDuration()).isAfter(privateJob.getDue())) {
         jobs.add(privateJob);
@@ -162,8 +163,15 @@ public class Truck {
       }
     }
 
-    return new Bid(deliveryMap.values(), unproductiveJobs, this,
-        valuator.getValuation(bestSchedule));
+    Bid bid =
+        new Bid(deliveryMap.values(), unproductiveJobs, this, valuator.getValuation(bestSchedule));
+    if (bid.getId() == 36) {
+      System.out.println("** ITS ABOUT TO HAPPEN");
+    }
+    return bid;
+
+    // return new Bid(deliveryMap.values(), unproductiveJobs, this,
+    // valuator.getValuation(bestSchedule));
   }
 
   /**

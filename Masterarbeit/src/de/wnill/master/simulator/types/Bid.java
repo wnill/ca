@@ -133,7 +133,8 @@ public class Bid {
   @Override
   public String toString() {
     return "Bid [id=" + id + ", maxLateness=" + maxLateness + ", sumLateness=" + sumLateness
-        + ", deliveries=" + deliveries + ", unproductive=[" + unproductiveJobs + "]";
+        + ", valuation=" + valuation + ", deliveries=" + deliveries + ", unproductive=["
+        + unproductiveJobs + "]";
   }
 
 
