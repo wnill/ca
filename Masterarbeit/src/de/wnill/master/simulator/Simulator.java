@@ -22,7 +22,7 @@ public class Simulator {
     scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
     scenario.setOrderAheadMaximum(6);
     scenario.setOrderAheadMinimum(6);
-    scenario.setOrderType(OrderType.SEQUENTIAL);
+    scenario.setOrderType(OrderType.BUNDLE);
     scenario.setRoundtripTime(Duration.ofMinutes(20));
     scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
     scenario.setValuator(new NonMonotonicLatenessValuation());

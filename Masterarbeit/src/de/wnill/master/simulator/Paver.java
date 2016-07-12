@@ -106,8 +106,8 @@ public class Paver {
     if (scenario.getOrderType().equals(OrderType.SEQUENTIAL)) {
       Bid bestBid = null;
       for (Bid bid : bids) {
-        if (bid != null
-            && (bestBid == null || bid.getSumLateness().compareTo(bestBid.getSumLateness()) < 0)) {
+        if (bid != null && (bestBid == null || bid.getValuation() < bestBid.getValuation())
+            && bid.getDeliveryIds().contains(requests.get(0).getId())) {
           bestBid = bid;
         }
       }

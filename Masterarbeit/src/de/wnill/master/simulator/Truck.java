@@ -139,7 +139,9 @@ public class Truck {
 
     // insert "blockers", that is, unscheduled private jobs
     for (Job privateJob : unscheduledPrivateJobs) {
-      if (privateJob.getDue().equals(lastDue) || privateJob.getDue().isBefore(lastDue)) {
+      if (privateJob.getDue().equals(lastDue) || privateJob.getDue().isBefore(lastDue)
+          || earliestStart.plus(privateJob.getDuration()).equals(privateJob.getDue())
+          || earliestStart.plus(privateJob.getDuration()).isAfter(privateJob.getDue())) {
         jobs.add(privateJob);
       }
     }

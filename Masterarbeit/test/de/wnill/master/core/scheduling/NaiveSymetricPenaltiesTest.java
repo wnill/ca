@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
+import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
 
@@ -30,8 +32,8 @@ public class NaiveSymetricPenaltiesTest {
     List<Job> result = alg.findOptimalJobTimes(jobList, LocalTime.of(0, 0), LocalTime.of(1, 0));
 
     System.out.println(result);
-
-    System.out.println(alg.calculateLatenessSum(result));
+    Valuator val = new NonMonotonicLatenessValuation();
+    System.out.println(val.getValuation(result));
   }
 
   @Test
@@ -47,7 +49,9 @@ public class NaiveSymetricPenaltiesTest {
         .ofMinutes(5)));
 
     NaiveSymetricPenalties alg = new NaiveSymetricPenalties();
-    List<Job> result = alg.scheduleJobs(jobList, LocalTime.of(0, 0), LocalTime.of(0, 50));
+    List<Job> result =
+        alg.scheduleJobs(jobList, LocalTime.of(0, 0), LocalTime.of(0, 50),
+            new NonMonotonicLatenessValuation());
 
     System.out.println("Best schedule: " + result);
   }
