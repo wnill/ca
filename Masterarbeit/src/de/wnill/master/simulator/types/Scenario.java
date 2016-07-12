@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
+import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.core.wdp.WinnerDeterminationAlgorithm;
 
 public class Scenario {
@@ -28,7 +29,7 @@ public class Scenario {
   private SchedulingAlgorithm schedulingAlgorithm;
 
 
-  // Paver related
+  // Order related
   /** the target time for the first delivery. */
   private LocalTime firstDockingTime;
 
@@ -39,6 +40,8 @@ public class Scenario {
 
   /** how many deliveries may be ordered at most at any given time */
   private int orderAheadMaximum;
+
+  private Valuator valuator;
 
   private WinnerDeterminationAlgorithm winnerDeterminationAlgorithm;
 
@@ -184,6 +187,20 @@ public class Scenario {
   public void setWinnerDeterminationAlgorithm(
       WinnerDeterminationAlgorithm winnerDeterminationAlgorithm) {
     this.winnerDeterminationAlgorithm = winnerDeterminationAlgorithm;
+  }
+
+  /**
+   * @return the valuator
+   */
+  public Valuator getValuator() {
+    return valuator;
+  }
+
+  /**
+   * @param valuator the valuator to set
+   */
+  public void setValuator(Valuator valuator) {
+    this.valuator = valuator;
   }
 
   /**

@@ -3,6 +3,7 @@ package de.wnill.master.core.scheduling;
 import java.time.LocalTime;
 import java.util.List;
 
+import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.simulator.types.Job;
 
 /**
@@ -175,8 +176,10 @@ public class MaximumLateness implements SchedulingAlgorithm {
   // return jobs;
   // }
 
+
   @Override
-  public List<Job> scheduleJobs(List<Job> jobs, LocalTime earliestStart, LocalTime latestComplete) {
+  public List<Job> scheduleJobs(List<Job> jobs, LocalTime earliestStart, LocalTime latestComplete,
+      Valuator valuator) {
     // TODO Auto-generated method stub
     return null;
   }

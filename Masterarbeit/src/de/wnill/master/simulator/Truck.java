@@ -3,6 +3,7 @@ package de.wnill.master.simulator;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -11,16 +12,24 @@ import java.util.List;
 import java.util.Set;
 
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
+import de.wnill.master.core.utils.ConversionHandler;
 import de.wnill.master.core.utils.PowerSet;
+import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
+import de.wnill.master.simulator.utils.JobComparator;
 
 public class Truck {
 
   private int id;
 
   private SchedulingAlgorithm scheduler;
+
+  private Valuator valuator;
+
+  // TODO make this a parameter
+  private final Duration EARLIEST_BREAK_SCHEDULING_BEFORE_DUE = Duration.ofMinutes(15);
 
   /**
    * Contains a list of all truck-specific jobs that MUST be executed - pauses, maintenance, etc.
@@ -37,11 +46,13 @@ public class Truck {
    */
   private Duration roundtripTime = Duration.ZERO;
 
-  public Truck(int id, SchedulingAlgorithm scheduler) {
+  public Truck(int id, SchedulingAlgorithm scheduler, Valuator valuator) {
     this.id = id;
     this.scheduler = scheduler;
+    this.valuator = valuator;
 
-    addPrivateJob(Duration.ofMinutes(10), LocalTime.of(12, 30));
+    // TODO move to Simulator
+    addPrivateJob(Duration.ofMinutes(20), LocalTime.of(12, 30));
   }
 
 
@@ -82,6 +93,7 @@ public class Truck {
 
     Set<Set<Delivery>> powerset = getPowerSet(deliveries);
     List<Bid> bids = new LinkedList<>();
+
 
     // earliest start time for this set of deliveries may be postponed due to already scheduled
     // jobs.
@@ -132,7 +144,7 @@ public class Truck {
       }
     }
 
-    List<Job> bestSchedule = scheduler.scheduleJobs(jobs, earliestStart, latestComplete);
+    List<Job> bestSchedule = scheduler.scheduleJobs(jobs, earliestStart, latestComplete, valuator);
 
     // No feasible schedule within given bounds
     if (bestSchedule.isEmpty())
@@ -148,7 +160,8 @@ public class Truck {
       }
     }
 
-    return new Bid(deliveryMap.values(), unproductiveJobs, this);
+    return new Bid(deliveryMap.values(), unproductiveJobs, this,
+        valuator.getValuation(bestSchedule));
   }
 
   /**
@@ -173,21 +186,33 @@ public class Truck {
     }
 
     for (Delivery delivery : bid.getDeliveries()) {
-      schedule.add(convertDeliveryToJob(delivery));
+      schedule.add(ConversionHandler.convertDeliveryToJob(delivery, roundtripTime));
     }
+
+    Collections.sort(schedule, new JobComparator());
   }
 
   /**
+   * No bids were awarded in this bid round. Thus, schedule unproductive jobs if possible.
    * 
-   * @param delivery
-   * @return
    */
-  private Job convertDeliveryToJob(Delivery delivery) {
-    Job job = new Job(delivery, delivery.getRequestedTime(), roundtripTime);
-    job.setScheduledStart(delivery.getProposedTime().minus(roundtripTime));
-    job.setId("D" + delivery.getId());
-    return job;
+  public void rejectAllBids() {
+    if (!schedule.isEmpty()) {
+      LocalTime begin = schedule.get(schedule.size() - 1).getScheduledEnd();
+      Iterator<Job> it = unscheduledPrivateJobs.iterator();
+      while (it.hasNext()) {
+        Job job = it.next();
+        if (Duration.between(begin.plus(job.getDuration()), job.getDue()).compareTo(
+            EARLIEST_BREAK_SCHEDULING_BEFORE_DUE) < 0) {
+          job.setScheduledStart(begin);
+          schedule.add(job);
+          it.remove();
+          begin = job.getScheduledEnd();
+        }
+      }
+    }
   }
+
 
 
   /**

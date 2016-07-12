@@ -20,6 +20,8 @@ public class Bid {
 
   private Duration sumLateness = Duration.ZERO;
 
+  private long valuation;
+
   private static int idCounter = 0;
 
   private LinkedList<Delivery> deliveries = new LinkedList<>();
@@ -28,7 +30,11 @@ public class Bid {
 
   private LinkedList<Job> unproductiveJobs = new LinkedList<>();
 
-  public Bid(Collection<Delivery> deliveries, Collection<Job> unproductiveJobs, Truck truck) {
+  public Bid(Collection<Delivery> deliveries, Collection<Job> unproductiveJobs, Truck truck,
+      long valuation) {
+
+    this.valuation = valuation;
+
     for (Delivery delivery : deliveries) {
       this.deliveries.add(delivery.clone());
       deliveryIds.add(delivery.getId());
@@ -40,17 +46,9 @@ public class Bid {
       }
     }
 
-    // Set a prohibitive penalty for tardiness, "normal" penalty for earliness
     for (Job job : unproductiveJobs) {
       this.unproductiveJobs.add(job);
       Duration deviation = Duration.between(job.getDue(), job.getScheduledEnd());
-
-      if (deviation.isNegative()) {
-        deviation = deviation.abs();
-      } else {
-        deviation = deviation.multipliedBy(100);
-      }
-
       sumLateness = sumLateness.plus(deviation);
       if (deviation.compareTo(maxLateness) > 0) {
         maxLateness = deviation;
@@ -116,6 +114,14 @@ public class Bid {
    */
   public LinkedList<Job> getUnproductiveJobs() {
     return unproductiveJobs;
+  }
+
+
+  /**
+   * @return the valuation
+   */
+  public long getValuation() {
+    return valuation;
   }
 
 

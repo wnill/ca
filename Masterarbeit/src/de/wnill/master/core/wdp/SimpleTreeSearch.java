@@ -154,7 +154,6 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
           }
         }
 
-
         if (valid) {
           oneNode.addChild(new TreeNode(bid.getId(), bid.getDeliveryIds(), bid.getSumLateness()
               .toMinutes(), bid.getTruck().getId()));

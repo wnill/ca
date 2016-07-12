@@ -91,7 +91,7 @@ public class Paver {
       System.out.println(bids);
     }
 
-    awardWinningBids(findWinningBids(bids, requests));
+    awardWinningBids(findWinningBids(bids, requests), trucks);
   }
 
   /**
@@ -120,16 +120,24 @@ public class Paver {
 
   /**
    * For each of the winning bids orders the owning truck to carry out the delivery, respectively.
+   * All other trucks get negative feedback.
    * 
    * @param winningBids
    */
-  private void awardWinningBids(Set<Bid> winningBids) {
+  private void awardWinningBids(Set<Bid> winningBids, List<Truck> allTrucks) {
+    Set<Truck> winningTrucks = new HashSet<>();
     if (winningBids != null) {
       for (Bid bid : winningBids) {
         if (bid != null) {
           bid.getTruck().awardBid(bid);
+          winningTrucks.add(bid.getTruck());
           System.out.println("Awarded truck " + bid.getTruck().getId() + " with bid " + bid);
         }
+      }
+    }
+    for (Truck truck : allTrucks) {
+      if (!winningTrucks.contains(truck)) {
+        truck.rejectAllBids();
       }
     }
   }

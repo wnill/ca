@@ -65,7 +65,7 @@ public class Engine implements Runnable {
     paver = new Paver(scenario);
     trucks = new ArrayList<>();
     for (int i = 0; i < scenario.getTruckCount(); i++) {
-      Truck truck = new Truck(i, scenario.getSchedulingAlgorithm());
+      Truck truck = new Truck(i, scenario.getSchedulingAlgorithm(), scenario.getValuator());
       truck.setRoundtripTime(scenario.getRoundtripTime());
       trucks.add(truck);
     }
