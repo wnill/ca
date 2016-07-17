@@ -7,6 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.wnill.master.core.scheduling.viz.ScheduleVisualizer;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
@@ -14,6 +17,9 @@ import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
 
 public class Paver {
+
+  private static final Logger logger = LoggerFactory.getLogger(Paver.class);
+
 
   /** meter per minute */
   private double speed;
@@ -57,7 +63,7 @@ public class Paver {
       nextDeliveryTime = nextDeliveryTime.plus(scenario.getOptimalDeliveryInterval());
     }
 
-    System.out.println("Requested deliveries: " + pendingDeliveries);
+    logger.debug("Requested deliveries: " + pendingDeliveries);
 
     if (scenario.getOrderType().equals(OrderType.BUNDLE)) {
       orderDeliveries(trucks, requests);
@@ -86,10 +92,10 @@ public class Paver {
     // Collect bids
     List<Bid> bids = new ArrayList<>();
     for (Truck truck : trucks) {
-      System.out.println("Requesting schedule for truck " + truck.getId());
+      logger.debug("Requesting schedule for truck " + truck.getId());
       bids.addAll(truck.makeBids(requests, Clock.getInstance().getCurrentTime(),
           scenario.getEndTime()));
-      System.out.println(bids);
+      logger.debug(bids.toString());
     }
 
     awardWinningBids(findWinningBids(bids, requests), trucks);
@@ -132,7 +138,7 @@ public class Paver {
         if (bid != null) {
           bid.getTruck().awardBid(bid);
           winningTrucks.add(bid.getTruck());
-          System.out.println("Awarded truck " + bid.getTruck().getId() + " with bid " + bid);
+          logger.info("Awarded truck " + bid.getTruck().getId() + " with bid " + bid);
         }
       }
     }

@@ -165,9 +165,6 @@ public class Truck {
 
     Bid bid =
         new Bid(deliveryMap.values(), unproductiveJobs, this, valuator.getValuation(bestSchedule));
-    if (bid.getId() == 36) {
-      System.out.println("** ITS ABOUT TO HAPPEN");
-    }
     return bid;
 
     // return new Bid(deliveryMap.values(), unproductiveJobs, this,

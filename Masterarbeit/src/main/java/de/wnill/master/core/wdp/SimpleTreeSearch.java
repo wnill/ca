@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.wnill.master.core.wdp.utils.TreeNode;
 import de.wnill.master.core.wdp.viz.TreeVisualisation;
 import de.wnill.master.simulator.Config;
@@ -19,6 +22,8 @@ import de.wnill.master.simulator.types.Delivery;
  *
  */
 public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
+
+  private static final Logger logger = LoggerFactory.getLogger(SimpleTreeSearch.class);
 
   private TreeNode searchTree;
 
@@ -37,7 +42,7 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
     Collections.sort(deliveryIds);
 
     searchTree = constructSearchTree(bids, deliveries);
-    System.out.println(searchTree);
+    logger.debug(searchTree.toString());
 
     purgeInvalidNodes(searchTree);
 

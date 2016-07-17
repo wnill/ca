@@ -48,7 +48,7 @@ public class RandomizedScenarioGenerator {
     }
 
     logger.info("Highest deviation between sequential and bundle simulation: " + highestDeviation
-        + "Based on scenario: " + bestScenario);
+        + " based on scenario: " + bestScenario);
   }
 
   private long executeComparingRun(Simulator simulator, Valuator val, Scenario randomScenario) {

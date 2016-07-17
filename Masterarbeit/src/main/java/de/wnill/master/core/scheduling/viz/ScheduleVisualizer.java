@@ -11,6 +11,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.jaret.util.date.Interval;
 import de.jaret.util.date.IntervalImpl;
 import de.jaret.util.date.JaretDate;
@@ -24,6 +27,9 @@ import de.wnill.master.simulator.Truck;
 import de.wnill.master.simulator.types.Job;
 
 public class ScheduleVisualizer {
+
+  private static final Logger logger = LoggerFactory.getLogger(ScheduleVisualizer.class);
+
 
   public static final List<DefaultRowHeader> headerList = new ArrayList<>();
 
@@ -61,7 +67,7 @@ public class ScheduleVisualizer {
                 job.getDue(), job.getScheduledEnd()), job.getId(), job.getDelivery() != null);
         row.addInterval(interval);
       }
-      System.out.println("Created row: " + row.getIntervals());
+      logger.debug("Created row: " + row.getIntervals());
       model.addRow(row);
 
     }

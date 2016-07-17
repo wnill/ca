@@ -7,6 +7,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.wnill.master.core.utils.PowerSet;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
@@ -17,6 +20,8 @@ import de.wnill.master.simulator.types.Delivery;
  *
  */
 public class NaiveExhaustiveEnumeration implements WinnerDeterminationAlgorithm {
+
+  private static final Logger logger = LoggerFactory.getLogger(NaiveExhaustiveEnumeration.class);
 
   @Override
   public Set<Bid> determineWinners(Collection<Bid> bids, Collection<Delivery> deliveries) {
@@ -69,7 +74,7 @@ public class NaiveExhaustiveEnumeration implements WinnerDeterminationAlgorithm 
       }
     }
 
-    System.out.println("Best bid set with total lateness of " + lowestLateness + ": " + bestSet);
+    logger.info("Best bid set with total lateness of " + lowestLateness + ": " + bestSet);
 
     return bestSet;
   }

@@ -9,11 +9,12 @@
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry including="**/*.java" kind="src" path="lib"/>
 	<classpathentry including="**/*.java" kind="src" path="res"/>
+	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/jgraphx.jar"/>
 	<classpathentry kind="lib" path="lib/timebars-1.49.jar"/>
 	<classpathentry kind="lib" path="lib/jaretutil-0.32.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre1.8.0_66">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>

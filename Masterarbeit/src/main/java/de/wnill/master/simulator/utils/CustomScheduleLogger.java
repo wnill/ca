@@ -3,9 +3,15 @@ package de.wnill.master.simulator.utils;
 import java.time.Duration;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.wnill.master.simulator.types.Job;
 
-public class ScheduleLogger {
+public class CustomScheduleLogger {
+
+  private static final Logger logger = LoggerFactory.getLogger(CustomScheduleLogger.class);
+
 
   public static void logSchedule(List<Job> schedule, long valuation) {
 
@@ -22,7 +28,7 @@ public class ScheduleLogger {
           .append(" (").append(Duration.between(job.getDue(), job.getScheduledEnd()).toMinutes())
           .append("m)], ");
     }
-    System.out.println(str.toString());
+    logger.debug(str.toString());
   }
 
 }
