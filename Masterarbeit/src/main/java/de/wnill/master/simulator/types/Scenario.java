@@ -2,6 +2,7 @@ package de.wnill.master.simulator.types;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.List;
 
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.valuation.Valuator;
@@ -28,6 +29,10 @@ public class Scenario {
 
   private SchedulingAlgorithm schedulingAlgorithm;
 
+  private List<LocalTime> truckBreaksDue;
+
+  private List<Duration> truckBreakDurations;
+
 
   // Order related
   /** the target time for the first delivery. */
@@ -45,6 +50,34 @@ public class Scenario {
 
   private WinnerDeterminationAlgorithm winnerDeterminationAlgorithm;
 
+
+  /**
+   * @return the truckBreaks
+   */
+  public List<LocalTime> getTruckBreaks() {
+    return truckBreaksDue;
+  }
+
+  /**
+   * @param truckBreaks the truckBreaks to set
+   */
+  public void setTruckBreaksDue(List<LocalTime> truckBreaks) {
+    this.truckBreaksDue = truckBreaks;
+  }
+
+  /**
+   * @return the truckBreakDurations
+   */
+  public List<Duration> getTruckBreakDurations() {
+    return truckBreakDurations;
+  }
+
+  /**
+   * @param truckBreakDurations the truckBreakDurations to set
+   */
+  public void setTruckBreakDurations(List<Duration> truckBreakDurations) {
+    this.truckBreakDurations = truckBreakDurations;
+  }
 
   /**
    * @return the firstDockingTime
@@ -252,6 +285,8 @@ public class Scenario {
     result = prime * result + ((roundtripTime == null) ? 0 : roundtripTime.hashCode());
     result = prime * result + ((schedulingAlgorithm == null) ? 0 : schedulingAlgorithm.hashCode());
     result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
+    result = prime * result + ((truckBreakDurations == null) ? 0 : truckBreakDurations.hashCode());
+    result = prime * result + ((truckBreaksDue == null) ? 0 : truckBreaksDue.hashCode());
     result = prime * result + truckCount;
     result = prime * result + ((valuator == null) ? 0 : valuator.hashCode());
     result =
@@ -271,7 +306,8 @@ public class Scenario {
     return "Scenario [startTime=" + startTime + ", endTime=" + endTime + ", orderType=" + orderType
         + ", truckCount=" + truckCount + ", roundtripTime=" + roundtripTime
         + ", offloadingDuration=" + offloadingDuration + ", schedulingAlgorithm="
-        + schedulingAlgorithm + ", firstDockingTime=" + firstDockingTime
+        + schedulingAlgorithm + ", truckBreaks=" + truckBreaksDue + ", truckBreakDurations="
+        + truckBreakDurations + ", firstDockingTime=" + firstDockingTime
         + ", optimalDeliveryInterval=" + optimalDeliveryInterval + ", orderAheadMinimum="
         + orderAheadMinimum + ", orderAheadMaximum=" + orderAheadMaximum + ", valuator=" + valuator
         + ", winnerDeterminationAlgorithm=" + winnerDeterminationAlgorithm + "]";
@@ -331,6 +367,16 @@ public class Scenario {
       if (other.startTime != null)
         return false;
     } else if (!startTime.equals(other.startTime))
+      return false;
+    if (truckBreakDurations == null) {
+      if (other.truckBreakDurations != null)
+        return false;
+    } else if (!truckBreakDurations.equals(other.truckBreakDurations))
+      return false;
+    if (truckBreaksDue == null) {
+      if (other.truckBreaksDue != null)
+        return false;
+    } else if (!truckBreaksDue.equals(other.truckBreaksDue))
       return false;
     if (truckCount != other.truckCount)
       return false;

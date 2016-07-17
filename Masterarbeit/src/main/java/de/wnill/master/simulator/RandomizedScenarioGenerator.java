@@ -2,6 +2,7 @@ package de.wnill.master.simulator;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -26,7 +27,7 @@ public class RandomizedScenarioGenerator {
 
   private final int MAX_TRUCK_COUNT = 10;
 
-  private final int SIM_RUNS = 5;
+  private final int SIM_RUNS = 20;
 
   private final int MIN_ORDER_AHEAD = 5;
 
@@ -118,6 +119,15 @@ public class RandomizedScenarioGenerator {
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
 
+    List<LocalTime> breaks = new LinkedList<>();
+    breaks.add(LocalTime.of(ThreadLocalRandom.current().nextInt(11, 14), ThreadLocalRandom
+        .current().nextInt(0, 59)));
+
+    scenario.setTruckBreaksDue(breaks);
+
+    List<Duration> durations = new LinkedList<>();
+    durations.add(Duration.ofMinutes(ThreadLocalRandom.current().nextInt(30, 45)));
+    scenario.setTruckBreakDurations(durations);
 
     long interval =
         ThreadLocalRandom.current().nextInt((int) scenario.getOffloadingDuration().toMinutes(),

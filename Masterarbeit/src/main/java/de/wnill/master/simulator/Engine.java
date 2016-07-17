@@ -75,6 +75,13 @@ public class Engine implements Runnable {
     for (int i = 0; i < scenario.getTruckCount(); i++) {
       Truck truck = new Truck(i, scenario.getSchedulingAlgorithm(), scenario.getValuator());
       truck.setRoundtripTime(scenario.getRoundtripTime());
+      if (scenario.getTruckBreaks() != null) {
+        for (int j = 0; j < scenario.getTruckBreaks().size(); j++) {
+          truck.addPrivateJob(scenario.getTruckBreakDurations().get(j), scenario.getTruckBreaks()
+              .get(j));
+        }
+      }
+
       trucks.add(truck);
     }
 
