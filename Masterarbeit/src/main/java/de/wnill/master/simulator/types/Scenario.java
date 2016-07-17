@@ -231,4 +231,120 @@ public class Scenario {
     this.endTime = endTime;
   }
 
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
+    result = prime * result + ((firstDockingTime == null) ? 0 : firstDockingTime.hashCode());
+    result = prime * result + ((offloadingDuration == null) ? 0 : offloadingDuration.hashCode());
+    result =
+        prime * result
+            + ((optimalDeliveryInterval == null) ? 0 : optimalDeliveryInterval.hashCode());
+    result = prime * result + orderAheadMaximum;
+    result = prime * result + orderAheadMinimum;
+    result = prime * result + ((orderType == null) ? 0 : orderType.hashCode());
+    result = prime * result + ((roundtripTime == null) ? 0 : roundtripTime.hashCode());
+    result = prime * result + ((schedulingAlgorithm == null) ? 0 : schedulingAlgorithm.hashCode());
+    result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
+    result = prime * result + truckCount;
+    result = prime * result + ((valuator == null) ? 0 : valuator.hashCode());
+    result =
+        prime
+            * result
+            + ((winnerDeterminationAlgorithm == null) ? 0 : winnerDeterminationAlgorithm.hashCode());
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "Scenario [startTime=" + startTime + ", endTime=" + endTime + ", orderType=" + orderType
+        + ", truckCount=" + truckCount + ", roundtripTime=" + roundtripTime
+        + ", offloadingDuration=" + offloadingDuration + ", schedulingAlgorithm="
+        + schedulingAlgorithm + ", firstDockingTime=" + firstDockingTime
+        + ", optimalDeliveryInterval=" + optimalDeliveryInterval + ", orderAheadMinimum="
+        + orderAheadMinimum + ", orderAheadMaximum=" + orderAheadMaximum + ", valuator=" + valuator
+        + ", winnerDeterminationAlgorithm=" + winnerDeterminationAlgorithm + "]";
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Scenario other = (Scenario) obj;
+    if (endTime == null) {
+      if (other.endTime != null)
+        return false;
+    } else if (!endTime.equals(other.endTime))
+      return false;
+    if (firstDockingTime == null) {
+      if (other.firstDockingTime != null)
+        return false;
+    } else if (!firstDockingTime.equals(other.firstDockingTime))
+      return false;
+    if (offloadingDuration == null) {
+      if (other.offloadingDuration != null)
+        return false;
+    } else if (!offloadingDuration.equals(other.offloadingDuration))
+      return false;
+    if (optimalDeliveryInterval == null) {
+      if (other.optimalDeliveryInterval != null)
+        return false;
+    } else if (!optimalDeliveryInterval.equals(other.optimalDeliveryInterval))
+      return false;
+    if (orderAheadMaximum != other.orderAheadMaximum)
+      return false;
+    if (orderAheadMinimum != other.orderAheadMinimum)
+      return false;
+    if (orderType != other.orderType)
+      return false;
+    if (roundtripTime == null) {
+      if (other.roundtripTime != null)
+        return false;
+    } else if (!roundtripTime.equals(other.roundtripTime))
+      return false;
+    if (schedulingAlgorithm == null) {
+      if (other.schedulingAlgorithm != null)
+        return false;
+    } else if (!schedulingAlgorithm.equals(other.schedulingAlgorithm))
+      return false;
+    if (startTime == null) {
+      if (other.startTime != null)
+        return false;
+    } else if (!startTime.equals(other.startTime))
+      return false;
+    if (truckCount != other.truckCount)
+      return false;
+    if (valuator == null) {
+      if (other.valuator != null)
+        return false;
+    } else if (!valuator.equals(other.valuator))
+      return false;
+    if (winnerDeterminationAlgorithm == null) {
+      if (other.winnerDeterminationAlgorithm != null)
+        return false;
+    } else if (!winnerDeterminationAlgorithm.equals(other.winnerDeterminationAlgorithm))
+      return false;
+    return true;
+  }
+
 }

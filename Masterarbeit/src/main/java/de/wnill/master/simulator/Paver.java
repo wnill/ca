@@ -70,8 +70,9 @@ public class Paver {
     }
 
     // TODO put this in the right place
-
-    new ScheduleVisualizer(trucks);
+    if (Config.isEnableVisualisation()) {
+      new ScheduleVisualizer(trucks);
+    }
   }
 
   /**

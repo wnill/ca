@@ -1,6 +1,7 @@
 package de.wnill.master.simulator;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -8,6 +9,7 @@ import de.wnill.master.simulator.events.StartOrders;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Context;
 import de.wnill.master.simulator.types.Event;
+import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.types.Scenario;
 import de.wnill.master.simulator.utils.EventComparator;
 
@@ -25,6 +27,8 @@ public class Engine implements Runnable {
   private Paver paver;
 
   private List<Truck> trucks;
+
+  private Simulator callback;
 
 
   private PriorityQueue<Event> events;
@@ -53,7 +57,11 @@ public class Engine implements Runnable {
     }
 
     // Generate report
-
+    List<List<Job>> completeSchedule = new LinkedList<>();
+    for (Truck truck : trucks) {
+      completeSchedule.add(truck.getSchedule());
+    }
+    callback.reportResults(scenario, completeSchedule);
   }
 
   /**
@@ -77,5 +85,9 @@ public class Engine implements Runnable {
 
   public void addEvent(Event event) {
     events.add(event);
+  }
+
+  public void registerResultCallback(Simulator simulator) {
+    this.callback = simulator;
   }
 }

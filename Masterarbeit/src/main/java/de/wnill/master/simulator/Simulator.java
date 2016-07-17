@@ -2,15 +2,22 @@ package de.wnill.master.simulator;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.wnill.master.core.scheduling.NaiveSymetricPenalties;
 import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
 import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.simulator.types.Condition;
+import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
 
 public class Simulator {
+
+  /** Maps scenario hashcode -> list of all schedules */
+  private Map<Integer, List<List<Job>>> resultMap = new HashMap<>();
 
   public void runScenario(Scenario scenario) {
 
@@ -22,6 +29,7 @@ public class Simulator {
         return false;
       }
     }, scenario);
+    engine.registerResultCallback(this);
     engine.run();
   }
 
@@ -70,6 +78,23 @@ public class Simulator {
     }, scenario);
     engine.run();
 
+  }
+
+  public void reportResults(Scenario scenario, List<List<Job>> schedules) {
+
+    resultMap.put(scenario.hashCode(), schedules);
+
+    synchronized (this) {
+      notifyAll();
+    }
+  }
+
+
+  /**
+   * @return the resultMap
+   */
+  public Map<Integer, List<List<Job>>> getResultMap() {
+    return resultMap;
   }
 
 }

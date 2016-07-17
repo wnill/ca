@@ -9,6 +9,7 @@ import java.util.Set;
 
 import de.wnill.master.core.wdp.utils.TreeNode;
 import de.wnill.master.core.wdp.viz.TreeVisualisation;
+import de.wnill.master.simulator.Config;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
 
@@ -50,7 +51,9 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
       }
     }
 
-    TreeVisualisation viz = new TreeVisualisation(searchTree, bestBidset);
+    if (Config.isEnableVisualisation()) {
+      TreeVisualisation viz = new TreeVisualisation(searchTree, bestBidset);
+    }
 
     return winners;
   }
