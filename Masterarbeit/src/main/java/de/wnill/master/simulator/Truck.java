@@ -50,9 +50,6 @@ public class Truck {
     this.id = id;
     this.scheduler = scheduler;
     this.valuator = valuator;
-
-    // TODO move to Simulator
-    addPrivateJob(Duration.ofMinutes(20), LocalTime.of(12, 40));
   }
 
 
@@ -128,10 +125,12 @@ public class Truck {
     // maps delivery id -> delivery
     HashMap<Integer, Delivery> deliveryMap = new HashMap<>();
     LocalTime lastDue = LocalTime.of(0, 0);
+    Duration minimumRequiredTime = Duration.ZERO;
     for (Delivery delivery : bundle) {
       // TODO what if truck needs less than a roundtrip time (stops halfway, e.g.)?
       jobs.add(new Job(delivery, delivery.getRequestedTime(), roundtripTime));
       deliveryMap.put(delivery.getId(), delivery);
+      minimumRequiredTime = minimumRequiredTime.plus(roundtripTime);
       if (delivery.getRequestedTime().isAfter(lastDue)) {
         lastDue = delivery.getRequestedTime();
       }
@@ -141,8 +140,10 @@ public class Truck {
     for (Job privateJob : unscheduledPrivateJobs) {
       if (privateJob.getTargetedStart().equals(lastDue)
           || privateJob.getTargetedStart().isBefore(lastDue)
-          || earliestStart.plus(privateJob.getDuration()).equals(privateJob.getDue())
-          || earliestStart.plus(privateJob.getDuration()).isAfter(privateJob.getDue())) {
+          || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
+              .equals(privateJob.getDue())
+          || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
+              .isAfter(privateJob.getDue())) {
         jobs.add(privateJob);
       }
     }
@@ -163,9 +164,8 @@ public class Truck {
       }
     }
 
-    Bid bid =
-        new Bid(deliveryMap.values(), unproductiveJobs, this, valuator.getValuation(bestSchedule));
-    return bid;
+    return new Bid(deliveryMap.values(), unproductiveJobs, this,
+        valuator.getValuation(bestSchedule));
 
     // return new Bid(deliveryMap.values(), unproductiveJobs, this,
     // valuator.getValuation(bestSchedule));

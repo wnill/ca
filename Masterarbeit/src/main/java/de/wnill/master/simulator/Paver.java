@@ -93,8 +93,12 @@ public class Paver {
     List<Bid> bids = new ArrayList<>();
     for (Truck truck : trucks) {
       logger.debug("Requesting schedule for truck " + truck.getId());
-      bids.addAll(truck.makeBids(requests, Clock.getInstance().getCurrentTime(),
-          scenario.getEndTime()));
+      LocalTime earliest =
+          Clock.getInstance().getCurrentTime()
+              .isAfter(scenario.getFirstDockingTime().minus(scenario.getRoundtripTime())) ? Clock
+              .getInstance().getCurrentTime() : scenario.getFirstDockingTime().minus(
+              scenario.getRoundtripTime());
+      bids.addAll(truck.makeBids(requests, earliest, scenario.getEndTime()));
       logger.debug(bids.toString());
     }
 

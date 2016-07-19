@@ -54,7 +54,7 @@ public class NaiveExhaustiveEnumeration implements WinnerDeterminationAlgorithm 
       long tmpLateness = 0;
       for (Bid bid : subset) {
         if (bid != null) {
-          tmpLateness += bid.getSumLateness().toMinutes();
+          tmpLateness += bid.getValuation();
           for (Delivery delivery : bid.getDeliveries()) {
 
             Iterator<Integer> it = uncoveredIds.iterator();

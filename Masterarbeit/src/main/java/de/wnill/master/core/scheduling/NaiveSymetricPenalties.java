@@ -11,8 +11,8 @@ import java.util.PriorityQueue;
 
 import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.simulator.types.Job;
-import de.wnill.master.simulator.utils.JobComparator;
 import de.wnill.master.simulator.utils.CustomScheduleLogger;
+import de.wnill.master.simulator.utils.JobComparator;
 
 /**
  * Algorithm as proposed by Garey, Tarjan and Wilfong (1988).
@@ -186,6 +186,7 @@ public class NaiveSymetricPenalties implements SchedulingAlgorithm {
         job.setScheduledStart(job.getScheduledStart().plus(delta));
       }
     }
+
 
     if (jobList.get(jobList.size() - 1).getScheduledEnd().isAfter(latestComplete)) {
       Duration delta =

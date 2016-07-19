@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.wnill.master.core.scheduling.NaiveSymetricPenalties;
-import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
+import de.wnill.master.core.valuation.TimespanVarBetweenDeliveries;
 import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Job;
@@ -37,39 +37,23 @@ public class Simulator {
 
   public static void main(String[] args) {
 
-    // // Configure BUNDLE scenario
-    // Scenario scenario = new Scenario();
-    // scenario.setEndTime(LocalTime.of(14, 0));
-    // scenario.setFirstDockingTime(LocalTime.of(12, 0));
-    // scenario.setOffloadingDuration(Duration.ofMinutes(5));
-    // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
-    // scenario.setOrderAheadMaximum(6);
-    // scenario.setOrderAheadMinimum(6);
-    // scenario.setOrderType(OrderType.BUNDLE);
-    // scenario.setRoundtripTime(Duration.ofMinutes(20));
-    // scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
-    // scenario.setValuator(new NonMonotonicLatenessValuation());
-    // scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
-    // scenario.setStartTime(LocalTime.of(11, 40));
-    // scenario.setTruckCount(2);
 
-
-    // Configure SEQUENTIAL scenario
+    // Configure a scenario
     Scenario scenario = new Scenario();
     scenario.setEndTime(LocalTime.of(14, 0));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(5));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(23));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(15));
     scenario.setOrderAheadMaximum(12);
-    scenario.setOrderAheadMinimum(3);
+    scenario.setOrderAheadMinimum(5);
     scenario.setOrderType(OrderType.BUNDLE);
-    scenario.setRoundtripTime(Duration.ofMinutes(105));
+    scenario.setRoundtripTime(Duration.ofMinutes(20));
     scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setTruckCount(1);
-    scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(11, 03)));
-    scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(34)));
-    scenario.setValuator(new NonMonotonicLatenessValuation());
+    scenario.setTruckCount(2);
+    scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(8, 30)));
+    scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(30)));
+    scenario.setValuator(new TimespanVarBetweenDeliveries());
     scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
 
 

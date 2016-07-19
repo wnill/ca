@@ -103,8 +103,8 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
     TreeNode tree = new TreeNode(-1, Collections.EMPTY_LIST, 0, -1);
     for (Bid bid : bids) {
       if (bid.getDeliveryIds().contains(deliveryIds.get(listIndex))) {
-        tree.addChild(new TreeNode(bid.getId(), bid.getDeliveryIds(), bid.getSumLateness()
-            .toMinutes(), bid.getTruck().getId()));
+        tree.addChild(new TreeNode(bid.getId(), bid.getDeliveryIds(), bid.getValuation(), bid
+            .getTruck().getId()));
       }
     }
 
@@ -163,8 +163,8 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
         }
 
         if (valid) {
-          oneNode.addChild(new TreeNode(bid.getId(), bid.getDeliveryIds(), bid.getSumLateness()
-              .toMinutes(), bid.getTruck().getId()));
+          oneNode.addChild(new TreeNode(bid.getId(), bid.getDeliveryIds(), bid.getValuation(), bid
+              .getTruck().getId()));
         }
       }
     }

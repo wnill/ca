@@ -1,4 +1,4 @@
-package de.wnill.master.simulator;
+package de.wnill.master.scenario;
 
 import java.time.Duration;
 import java.time.LocalTime;
