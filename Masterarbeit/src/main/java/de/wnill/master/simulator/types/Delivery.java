@@ -10,6 +10,11 @@ public class Delivery {
 
   private LocalTime proposedTime;
 
+  /**
+   * 
+   * @param id
+   * @param reqTime the due date for this delivery
+   */
   public Delivery(int id, LocalTime reqTime) {
     this.id = id;
     requestedTime = reqTime;

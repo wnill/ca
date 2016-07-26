@@ -18,7 +18,7 @@ import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
-import de.wnill.master.simulator.utils.JobComparator;
+import de.wnill.master.simulator.utils.JobStartTimeComparator;
 
 public class Truck {
 
@@ -196,7 +196,7 @@ public class Truck {
       schedule.add(ConversionHandler.convertDeliveryToJob(delivery, roundtripTime));
     }
 
-    Collections.sort(schedule, new JobComparator());
+    Collections.sort(schedule, new JobStartTimeComparator());
   }
 
   /**
@@ -244,6 +244,14 @@ public class Truck {
    */
   public ArrayList<Job> getSchedule() {
     return schedule;
+  }
+
+
+  /**
+   * @param schedule the schedule to set
+   */
+  public void setSchedule(List<Job> schedule) {
+    this.schedule = new ArrayList<Job>(schedule);
   }
 
 
