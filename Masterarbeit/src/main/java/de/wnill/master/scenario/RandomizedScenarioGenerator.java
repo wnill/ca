@@ -9,7 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wnill.master.core.scheduling.NaiveSymetricPenalties;
+import de.wnill.master.core.scheduling.NeighborhoodSearch;
 import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
 import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.core.wdp.SimpleTreeSearch;
@@ -142,7 +142,7 @@ public class RandomizedScenarioGenerator {
     scenario.setTruckCount(ThreadLocalRandom.current().nextInt(1, MAX_TRUCK_COUNT));
 
     // TODO do not hardcode algorithms
-    scenario.setSchedulingAlgorithm(new NaiveSymetricPenalties());
+    scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setValuator(new NonMonotonicLatenessValuation());
     scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
 

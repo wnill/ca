@@ -22,7 +22,6 @@ import de.wnill.master.simulator.utils.JobDueDateComparator;
 public class NeighborhoodSearch implements SchedulingAlgorithm {
 
   private static final Logger logger = LoggerFactory.getLogger(NeighborhoodSearch.class);
-  private NaiveSymetricPenalties alg = new NaiveSymetricPenalties();
   private LocalTime earliestStart;
   private LocalTime latestComplete;
 
@@ -43,12 +42,18 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
   }
 
   /**
-   * Based on Szwarc/
+   * Based on Szwarc.
    * 
    * @param jobs
    * @return
    */
   public List<Job> timeJobs(List<Job> jobs, LocalTime earliestStart) {
+
+    if (jobs.size() == 2 && jobs.get(0).getDelivery() != null
+        && jobs.get(0).getDelivery().getId() == 1 && jobs.get(1).getDelivery() != null
+        && jobs.get(1).getDelivery().getId() == 4) {
+      System.out.println("break!");
+    }
 
     LinkedList<Job> schedule = new LinkedList<>(jobs);
     List<Integer> alphas = generatesAlphas(jobs);
@@ -130,7 +135,7 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
   }
 
   private List<Job> findBestSchedule(List<Job> jobs, Valuator valuator) {
-    List<Job> initSchedule = alg.findOptimalJobTimes(jobs, earliestStart, latestComplete);
+    List<Job> initSchedule = timeJobs(jobs, earliestStart);
 
     long bestValuation = valuator.getValuation(initSchedule);
     List<Job> bestSequence = jobs;
@@ -147,7 +152,7 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
           LinkedList<Job> permutation = new LinkedList<>(jobs);
           Job theBreak = permutation.remove(originalPosition);
           permutation.add(position, theBreak);
-          List<Job> schedule = alg.findOptimalJobTimes(permutation, earliestStart, latestComplete);
+          List<Job> schedule = timeJobs(permutation, earliestStart);
           if (valuator.getValuation(schedule) < bestValuation) {
             bestValuation = valuator.getValuation(schedule);
             bestSequence = schedule;
@@ -158,7 +163,6 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
     }
     return bestSequence;
   }
-
 
   private List<Integer> generateBetas(List<Job> jobs) {
     ArrayList<Integer> betas = new ArrayList<>();
@@ -201,6 +205,10 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
       job.setScheduledStart(startTime);
       Duration newEarliness = Duration.between(job.getScheduledEnd(), job.getDue());
 
+      if (i == 0 && !newEarliness.isNegative() && !newEarliness.isZero()) {
+        cluster.setLastEarlyJob(schedule.getFirst());
+      }
+
       if (!earliness.isNegative() && newEarliness.isNegative() && i > 0) {
         cluster.setLastEarlyJob(schedule.get(i - 1));
       }
@@ -209,6 +217,11 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
         cluster.calculateValues();
         cluster = new Cluster();
         clusters.add(cluster);
+
+        if (!newEarliness.isNegative() && !newEarliness.isZero()) {
+          cluster.setLastEarlyJob(schedule.get(i));
+        }
+
       }
       cluster.addJob(job, alphas.get(i), betas.get(i));
       earliness = newEarliness;

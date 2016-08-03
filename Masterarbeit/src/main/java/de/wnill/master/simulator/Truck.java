@@ -197,6 +197,18 @@ public class Truck {
     }
 
     Collections.sort(schedule, new JobStartTimeComparator());
+
+    // Check if there is an unproductive job left, which must be scheduled next urgently
+    Iterator<Job> it = unscheduledPrivateJobs.iterator();
+    while (it.hasNext()) {
+      Job unscheduled = it.next();
+      if (Duration.between(schedule.get(schedule.size() - 1).getScheduledEnd(),
+          unscheduled.getDue()).compareTo(roundtripTime) < 0) {
+        unscheduled.setScheduledStart(schedule.get(schedule.size() - 1).getScheduledEnd());
+        schedule.add(unscheduled);
+        it.remove();
+      }
+    }
   }
 
   /**
