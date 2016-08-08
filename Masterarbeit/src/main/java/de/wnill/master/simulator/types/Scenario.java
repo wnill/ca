@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
+import de.wnill.master.core.scheduling.second.SecondPassProcessor;
 import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.core.wdp.WinnerDeterminationAlgorithm;
 
@@ -28,6 +29,8 @@ public class Scenario {
   private Duration offloadingDuration;
 
   private SchedulingAlgorithm schedulingAlgorithm;
+
+  private SecondPassProcessor secondPassProcessor;
 
   private List<LocalTime> truckBreaksDue;
 
@@ -205,6 +208,27 @@ public class Scenario {
    */
   public void setSchedulingAlgorithm(SchedulingAlgorithm schedulingAlgorithm) {
     this.schedulingAlgorithm = schedulingAlgorithm;
+  }
+
+  /**
+   * @return the secondPassProcessor
+   */
+  public SecondPassProcessor getSecondPassProcessor() {
+    return secondPassProcessor;
+  }
+
+  /**
+   * @param secondPassProcessor the secondPassProcessor to set
+   */
+  public void setSecondPassProcessor(SecondPassProcessor secondPassProcessor) {
+    this.secondPassProcessor = secondPassProcessor;
+  }
+
+  /**
+   * @return the truckBreaksDue
+   */
+  public List<LocalTime> getTruckBreaksDue() {
+    return truckBreaksDue;
   }
 
   /**

@@ -8,7 +8,7 @@ import de.wnill.master.simulator.types.Delivery;
  * Sorts events by event time (ascending)
  * 
  */
-public class DeliveryComparator implements Comparator<Delivery> {
+public class DeliveryProposedTimeComparator implements Comparator<Delivery> {
 
   @Override
   public int compare(Delivery d1, Delivery d2) {

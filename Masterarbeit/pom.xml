@@ -59,5 +59,15 @@
 			<version>4.12</version>
 		</dependency>
 
+		<dependency>
+			<groupId>javailp</groupId>
+			<artifactId>javailp</artifactId>
+			<version>1.2a</version>
+		</dependency>
+		<dependency>
+			<groupId>lpsolve</groupId>
+			<artifactId>lpsolve</artifactId>
+			<version>5.5</version>
+		</dependency>
 	</dependencies>
 </project>

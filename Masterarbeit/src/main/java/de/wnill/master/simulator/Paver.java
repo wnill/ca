@@ -102,7 +102,13 @@ public class Paver {
       logger.debug(bids.toString());
     }
 
-    awardWinningBids(findWinningBids(bids, requests), trucks);
+    Set<Bid> winningBids = findWinningBids(bids, requests);
+
+    if (scenario.getSecondPassProcessor() != null) {
+      winningBids = scenario.getSecondPassProcessor().updateBids(winningBids);
+    }
+
+    awardWinningBids(winningBids, trucks);
   }
 
   /**

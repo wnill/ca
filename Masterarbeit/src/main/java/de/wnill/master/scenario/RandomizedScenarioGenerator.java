@@ -139,7 +139,7 @@ public class RandomizedScenarioGenerator {
         + ThreadLocalRandom.current().nextInt(1, 11));
     scenario.setRoundtripTime(Duration.ofMinutes(ThreadLocalRandom.current().nextInt(1,
         MAX_ROUNDTRIP_TIME_IN_MIN + 1)));
-    scenario.setTruckCount(ThreadLocalRandom.current().nextInt(1, MAX_TRUCK_COUNT));
+    scenario.setTruckCount(ThreadLocalRandom.current().nextInt(2, MAX_TRUCK_COUNT));
 
     // TODO do not hardcode algorithms
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());

@@ -9,11 +9,11 @@ import de.wnill.master.simulator.types.Job;
 public class NonMonotonicLatenessValuation implements Valuator {
 
   private static final Duration ACCEPTABLE_EARLINESS_THRESHOLD_NONPROD_JOBS = Duration
-      .ofMinutes(30);
+      .ofMinutes(60);
 
-  private static final long NONPROD_LATENESS_PENALTY_MULTIPLICATOR = 100;
+  private static final long NONPROD_LATENESS_PENALTY_MULTIPLICATOR = 10000;
 
-  private static final long NONPROD_EARLINESS_PENALTY_MULTIPLICATOR = 100;
+  private static final long NONPROD_EARLINESS_PENALTY_MULTIPLICATOR = 0;
 
 
   /*
@@ -83,7 +83,7 @@ public class NonMonotonicLatenessValuation implements Valuator {
       valuation = delta.abs().multipliedBy(NONPROD_EARLINESS_PENALTY_MULTIPLICATOR).toMinutes();
       // Penalty if breaks are a bit early
     } else if (delta.isNegative()) {
-      valuation = delta.abs().toMinutes();
+      valuation = 0;
       // Penalty if breaks are too late
     } else if (!delta.isNegative()) {
       valuation = delta.multipliedBy(NONPROD_LATENESS_PENALTY_MULTIPLICATOR).toMinutes();

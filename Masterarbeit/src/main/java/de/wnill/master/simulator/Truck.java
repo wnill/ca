@@ -14,6 +14,7 @@ import java.util.Set;
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.utils.ConversionHandler;
 import de.wnill.master.core.utils.PowerSet;
+import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
 import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
@@ -148,7 +149,9 @@ public class Truck {
       }
     }
 
-    List<Job> bestSchedule = scheduler.scheduleJobs(jobs, earliestStart, latestComplete, valuator);
+    List<Job> bestSchedule =
+        scheduler.scheduleJobs(jobs, earliestStart, latestComplete,
+            new NonMonotonicLatenessValuation());
 
     // No feasible schedule within given bounds
     if (bestSchedule.isEmpty())

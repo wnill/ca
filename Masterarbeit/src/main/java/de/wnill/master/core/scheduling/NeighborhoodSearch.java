@@ -148,7 +148,7 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
         int originalPosition = jobs.indexOf(job);
         int position = originalPosition - 1;
 
-        while (position > 0) {
+        while (position >= 0) {
           LinkedList<Job> permutation = new LinkedList<>(jobs);
           Job theBreak = permutation.remove(originalPosition);
           permutation.add(position, theBreak);

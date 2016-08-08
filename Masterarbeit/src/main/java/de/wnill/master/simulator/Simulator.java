@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.wnill.master.core.scheduling.NeighborhoodSearch;
-import de.wnill.master.core.valuation.TimespanVarBetweenDeliveries;
+import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
 import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Job;
@@ -43,17 +43,17 @@ public class Simulator {
     scenario.setEndTime(LocalTime.of(23, 59));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(28));
-    scenario.setOrderAheadMaximum(6);
-    scenario.setOrderAheadMinimum(4);
-    scenario.setOrderType(OrderType.BUNDLE);
-    scenario.setRoundtripTime(Duration.ofMinutes(52));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(27));
+    scenario.setOrderAheadMaximum(12);
+    scenario.setOrderAheadMinimum(6);
+    scenario.setOrderType(OrderType.SEQUENTIAL);
+    scenario.setRoundtripTime(Duration.ofMinutes(145));
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setTruckCount(4);
-    scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(13, 22)));
+    scenario.setTruckCount(2);
+    scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(11, 01)));
     scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(35)));
-    scenario.setValuator(new TimespanVarBetweenDeliveries());
+    scenario.setValuator(new NonMonotonicLatenessValuation());
     scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
 
 
