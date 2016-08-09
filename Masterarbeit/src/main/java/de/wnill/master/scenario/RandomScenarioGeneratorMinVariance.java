@@ -40,8 +40,10 @@ public class RandomScenarioGeneratorMinVariance {
     Config.setEnableVisualisation(false);
     Simulator simulator = new Simulator();
     Valuator val = new NonMonotonicLatenessValuation();
-    double highestDeviation = 0;
+    double bestCase = 0;
+    double worstCase = 0;
     Scenario bestScenario = null;
+    Scenario worstScenario = null;
 
     int improvement = 0;
     int worse = 0;
@@ -56,19 +58,23 @@ public class RandomScenarioGeneratorMinVariance {
         worse++;
       }
 
-      if (deviation > highestDeviation) {
-        highestDeviation = deviation;
+      if (deviation > bestCase) {
+        bestCase = deviation;
         bestScenario = randomScenario;
+      } else if (deviation < worstCase) {
+        worstCase = deviation;
+        worstScenario = randomScenario;
       }
     }
 
     DecimalFormat df = new DecimalFormat("#.00");
-    logger.info("Highest deviation between sequential and bundle simulation: " + highestDeviation
-        + " (StdDev: " + df.format(Math.sqrt(highestDeviation)) + ") based on scenario: "
-        + bestScenario);
-    logger.info("Schedules improved in "
-        + df.format((double) improvement / (double) SIM_RUNS * 100) + "%, worse in "
-        + df.format((double) worse / (double) SIM_RUNS * 100) + "% of simulation runs");
+    logger.info("Highest best case deviation between sequential and bundle simulation: " + bestCase
+        + " (StdDev: " + df.format(Math.sqrt(bestCase)) + ") based on scenario: " + bestScenario);
+    logger.info("Highest worst case deviation between sequential and bundle simulation: "
+        + -worstCase + " (StdDev: " + df.format(Math.sqrt(-worstCase)) + ") based on scenario: "
+        + worstScenario);
+    logger.info("Schedules improved in " + df.format((double) improvement / SIM_RUNS * 100d)
+        + "%, worse in " + df.format((double) worse / SIM_RUNS * 100d) + "% of simulation runs");
   }
 
   private double executeComparingRun(Simulator simulator, Valuator val, Scenario randomScenario) {
