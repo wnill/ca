@@ -137,6 +137,11 @@ public class Truck {
       }
     }
 
+    if ((deliveryMap.size() == 3 && deliveryMap.containsKey(2) && deliveryMap.containsKey(4) && deliveryMap
+        .containsKey(6))) {
+      System.out.println("break");
+    }
+
     // insert "blockers", that is, unscheduled private jobs
     for (Job privateJob : unscheduledPrivateJobs) {
       if (privateJob.getTargetedStart().equals(lastDue)

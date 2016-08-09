@@ -49,11 +49,6 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
    */
   public List<Job> timeJobs(List<Job> jobs, LocalTime earliestStart) {
 
-    if (jobs.size() == 1 && jobs.get(0).getDelivery() != null
-        && jobs.get(0).getDelivery().getId() == 2) {
-      System.out.println("break!");
-    }
-
     LinkedList<Job> schedule = new LinkedList<>(jobs);
     List<Integer> alphas = generatesAlphas(jobs);
     List<Integer> betas = generateBetas(jobs);
@@ -212,6 +207,7 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
         cluster.setLastEarlyJob(schedule.get(i - 1));
       }
 
+
       if (newEarliness.compareTo(earliness) > 0) {
         cluster.calculateValues();
         cluster = new Cluster();
@@ -225,6 +221,12 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
       cluster.addJob(job, alphas.get(i), betas.get(i));
       earliness = newEarliness;
       startTime = startTime.plus(job.getDuration());
+
+      // if all jobs are early and there is only one cluster, set last early job correctly
+      if (!newEarliness.isNegative() && i == (schedule.size() - 1)) {
+        cluster.setLastEarlyJob(job);
+      }
+
     }
 
     // dont forget to calculate the values of last cluster
@@ -269,6 +271,11 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
       }
 
       int indexOfLastEarlyJob = jobs.indexOf(lastEarlyJob);
+
+      if (indexOfLastEarlyJob == -1) {
+        System.out.println("break");
+      }
+
       delta =
           calcDelta(indexOfLastEarlyJob - 1) + alphas.get(indexOfLastEarlyJob)
               + betas.get(indexOfLastEarlyJob);

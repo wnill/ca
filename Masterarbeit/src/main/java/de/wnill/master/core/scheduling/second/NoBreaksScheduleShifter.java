@@ -138,7 +138,7 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
           linear = new Linear();
           linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i))));
           linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i - 1))));
-          problem.add(linear, "=", duration);
+          problem.add(linear, ">=", duration);
         }
       } else if (bid.getDeliveries().size() == 1) {
         // if only one delivery is offered we can set it to desired optimal time

@@ -30,11 +30,11 @@ public class RandomScenarioGeneratorMinVariance {
 
   private final int MAX_ROUNDTRIP_TIME_IN_MIN = 180;
 
-  private final int MAX_TRUCK_COUNT = 10;
+  private final int MAX_TRUCK_COUNT = 5;
 
-  private final int SIM_RUNS = 20;
+  private final int SIM_RUNS = 100;
 
-  private final int MIN_ORDER_AHEAD = 5;
+  private final int MIN_ORDER_AHEAD = 8;
 
   public void findOptimalDemoScenario() {
     Config.setEnableVisualisation(false);
@@ -43,9 +43,18 @@ public class RandomScenarioGeneratorMinVariance {
     double highestDeviation = 0;
     Scenario bestScenario = null;
 
+    int improvement = 0;
+    int worse = 0;
+
     for (int i = 0; i < SIM_RUNS; i++) {
       Scenario randomScenario = generateRandomScenario();
       double deviation = executeComparingRun(simulator, val, randomScenario);
+
+      if (deviation > 0) {
+        improvement++;
+      } else if (deviation < 0) {
+        worse++;
+      }
 
       if (deviation > highestDeviation) {
         highestDeviation = deviation;
@@ -57,6 +66,9 @@ public class RandomScenarioGeneratorMinVariance {
     logger.info("Highest deviation between sequential and bundle simulation: " + highestDeviation
         + " (StdDev: " + df.format(Math.sqrt(highestDeviation)) + ") based on scenario: "
         + bestScenario);
+    logger.info("Schedules improved in "
+        + df.format((double) improvement / (double) SIM_RUNS * 100) + "%, worse in "
+        + df.format((double) worse / (double) SIM_RUNS * 100) + "% of simulation runs");
   }
 
   private double executeComparingRun(Simulator simulator, Valuator val, Scenario randomScenario) {
@@ -102,6 +114,10 @@ public class RandomScenarioGeneratorMinVariance {
 
     double deviation = seqVariance - bundleVariance;
     logger.info("Deviation: " + deviation);
+    if (deviation < 0) {
+      logger.info("Bad scenario! " + randomBundleScenario);
+    }
+
     return deviation;
   }
 
@@ -155,18 +171,20 @@ public class RandomScenarioGeneratorMinVariance {
     List<Duration> durations = new LinkedList<>();
     // durations.add(Duration.ofMinutes(ThreadLocalRandom.current().nextInt(30, 45)));
     scenario.setTruckBreakDurations(durations);
+    scenario.setTruckCount(ThreadLocalRandom.current().nextInt(2, MAX_TRUCK_COUNT));
 
     long interval =
         ThreadLocalRandom.current().nextInt((int) scenario.getOffloadingDuration().toMinutes(),
             (int) (5 * scenario.getOffloadingDuration().toMinutes() + 1));
     scenario.setOptimalDeliveryInterval(Duration.ofMinutes(interval));
 
-    scenario.setOrderAheadMinimum(ThreadLocalRandom.current().nextInt(3, MIN_ORDER_AHEAD));
+    scenario.setOrderAheadMinimum(ThreadLocalRandom.current().nextInt(scenario.getTruckCount(),
+        MIN_ORDER_AHEAD));
     scenario.setOrderAheadMaximum(scenario.getOrderAheadMinimum()
         + ThreadLocalRandom.current().nextInt(1, 11));
     scenario.setRoundtripTime(Duration.ofMinutes(ThreadLocalRandom.current().nextInt(1,
         MAX_ROUNDTRIP_TIME_IN_MIN + 1)));
-    scenario.setTruckCount(ThreadLocalRandom.current().nextInt(2, MAX_TRUCK_COUNT));
+
 
     // TODO do not hardcode algorithms
     scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
