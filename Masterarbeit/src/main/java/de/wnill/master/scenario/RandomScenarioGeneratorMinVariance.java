@@ -134,9 +134,11 @@ public class RandomScenarioGeneratorMinVariance {
     Collections.sort(deliveries, new JobStartTimeComparator());
 
 
-    Long meanInterval =
+    double meanInterval =
         Duration.between(deliveries.getFirst().getScheduledEnd(),
             deliveries.getLast().getScheduledEnd()).toMinutes();
+    meanInterval = meanInterval / (deliveries.size() - 1);
+
 
     double variance = 0;
 
