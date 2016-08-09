@@ -49,9 +49,8 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
    */
   public List<Job> timeJobs(List<Job> jobs, LocalTime earliestStart) {
 
-    if (jobs.size() == 2 && jobs.get(0).getDelivery() != null
-        && jobs.get(0).getDelivery().getId() == 1 && jobs.get(1).getDelivery() != null
-        && jobs.get(1).getDelivery().getId() == 4) {
+    if (jobs.size() == 1 && jobs.get(0).getDelivery() != null
+        && jobs.get(0).getDelivery().getId() == 2) {
       System.out.println("break!");
     }
 
