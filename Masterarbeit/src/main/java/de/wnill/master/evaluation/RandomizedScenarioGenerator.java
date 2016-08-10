@@ -1,4 +1,4 @@
-package de.wnill.master.scenario;
+package de.wnill.master.evaluation;
 
 import java.time.Duration;
 import java.time.LocalTime;

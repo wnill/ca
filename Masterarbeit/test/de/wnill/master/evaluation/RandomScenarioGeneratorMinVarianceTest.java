@@ -1,4 +1,4 @@
-package de.wnill.master.scenario;
+package de.wnill.master.evaluation;
 
 import static org.junit.Assert.assertEquals;
 
@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import de.wnill.master.evaluation.RandomScenarioGeneratorMinVariance;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
 

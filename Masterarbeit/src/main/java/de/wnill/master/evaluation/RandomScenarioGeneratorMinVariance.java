@@ -1,4 +1,4 @@
-package de.wnill.master.scenario;
+package de.wnill.master.evaluation;
 
 import java.text.DecimalFormat;
 import java.time.Duration;
@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import de.wnill.master.core.scheduling.NeighborhoodSearch;
 import de.wnill.master.core.scheduling.second.NoBreaksScheduleShifter;
 import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
+import de.wnill.master.core.valuation.TruckIdleTimes;
 import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.simulator.Config;
@@ -35,6 +36,10 @@ public class RandomScenarioGeneratorMinVariance {
   private final int SIM_RUNS = 100;
 
   private final int MIN_ORDER_AHEAD = 8;
+
+  private ResultsCollector collector = new ResultsCollector();
+
+  private TruckIdleTimes idleCalc = new TruckIdleTimes();
 
   public void findOptimalDemoScenario() {
     Config.setEnableVisualisation(false);
@@ -75,6 +80,8 @@ public class RandomScenarioGeneratorMinVariance {
         + worstScenario);
     logger.info("Schedules improved in " + df.format((double) improvement / SIM_RUNS * 100d)
         + "%, worse in " + df.format((double) worse / SIM_RUNS * 100d) + "% of simulation runs");
+
+    collector.printResults();
   }
 
   private double executeComparingRun(Simulator simulator, Valuator val, Scenario randomScenario) {
@@ -96,7 +103,9 @@ public class RandomScenarioGeneratorMinVariance {
 
     List<List<Job>> completeSchedule = simulator.getResultMap().get(randomScenario.hashCode());
     double seqVariance = calculateVariance(completeSchedule);
-    logger.info("Completed sequential run. Variance: " + seqVariance);
+    long idleTimes = idleCalc.getValuation(completeSchedule);
+    logger.info("Completed sequential run. Variance: " + seqVariance + ", IdleTimes: " + idleTimes);
+    collector.putResult(OrderType.SEQUENTIAL, idleTimes, seqVariance);
 
     logger.info("Starting a bundle simulation run with scenario: " + randomScenario);
     Scenario randomBundleScenario = randomScenario;
@@ -116,7 +125,9 @@ public class RandomScenarioGeneratorMinVariance {
 
     completeSchedule = simulator.getResultMap().get(randomBundleScenario.hashCode());
     double bundleVariance = calculateVariance(completeSchedule);
-    logger.info("Completed bundle run. Variance: " + bundleVariance);
+    idleTimes = idleCalc.getValuation(completeSchedule);
+    collector.putResult(OrderType.BUNDLE, idleTimes, bundleVariance);
+    logger.info("Completed bundle run. Variance: " + bundleVariance + ", IdleTimes: " + idleTimes);
 
     double deviation = seqVariance - bundleVariance;
     logger.info("Deviation: " + deviation);

@@ -14,7 +14,7 @@ public class TimespanVarBetweenDeliveries implements Valuator {
   @Override
   public long getValuation(Collection<Job> jobs, Collection<Delivery> deliveries) {
     // TODO Auto-generated method stub
-    return 10;
+    return -1;
   }
 
   @Override

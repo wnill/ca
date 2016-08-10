@@ -10,6 +10,8 @@ public class Delivery {
 
   private LocalTime proposedTime;
 
+  private LocalTime startTime;
+
   /**
    * 
    * @param id
@@ -65,11 +67,26 @@ public class Delivery {
   }
 
   /**
+   * @return the startTime
+   */
+  public LocalTime getStartTime() {
+    return startTime;
+  }
+
+  /**
+   * @param startTime the startTime to set
+   */
+  public void setStartTime(LocalTime startTime) {
+    this.startTime = startTime;
+  }
+
+  /**
    * Returns a deep copy of this object.
    */
   public Delivery clone() {
     Delivery clone = new Delivery(this.getId(), this.getRequestedTime());
     clone.setProposedTime(this.proposedTime);
+    clone.setStartTime(this.getStartTime());
     return clone;
   }
 

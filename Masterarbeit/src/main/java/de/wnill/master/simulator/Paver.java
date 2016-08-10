@@ -132,6 +132,7 @@ public class Paver {
     } else if (scenario.getOrderType().equals(OrderType.BUNDLE)) {
       bestBids.addAll(scenario.getWinnerDeterminationAlgorithm().determineWinners(bids, requests));
     }
+
     return bestBids;
   }
 

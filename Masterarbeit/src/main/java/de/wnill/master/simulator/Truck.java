@@ -137,11 +137,6 @@ public class Truck {
       }
     }
 
-    if ((deliveryMap.size() == 3 && deliveryMap.containsKey(2) && deliveryMap.containsKey(4) && deliveryMap
-        .containsKey(6))) {
-      System.out.println("break");
-    }
-
     // insert "blockers", that is, unscheduled private jobs
     for (Job privateJob : unscheduledPrivateJobs) {
       if (privateJob.getTargetedStart().equals(lastDue)
@@ -163,20 +158,20 @@ public class Truck {
       return null;
 
     LinkedList<Job> unproductiveJobs = new LinkedList<>();
+    LinkedList<Delivery> deliveries = new LinkedList<>();
     for (Job job : bestSchedule) {
       if (job.getDelivery() != null) {
         Delivery delivery = deliveryMap.get(job.getDelivery().getId());
         delivery.setProposedTime(job.getScheduledEnd());
+        delivery.setStartTime(job.getScheduledStart());
+        deliveries.add(delivery);
       } else {
         unproductiveJobs.add(job);
       }
     }
 
-    return new Bid(deliveryMap.values(), unproductiveJobs, this,
-        valuator.getValuation(bestSchedule));
+    return new Bid(deliveries, unproductiveJobs, this, valuator.getValuation(bestSchedule));
 
-    // return new Bid(deliveryMap.values(), unproductiveJobs, this,
-    // valuator.getValuation(bestSchedule));
   }
 
   /**
