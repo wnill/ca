@@ -87,8 +87,13 @@ public class RandomScenarioGeneratorMinVariance {
   private double executeComparingRun(Simulator simulator, Valuator val, Scenario randomScenario) {
     randomScenario.setOrderType(OrderType.SEQUENTIAL);
 
+    // TODO remove
+    randomScenario.setValuator(new NonMonotonicLatenessValuation());
+
+
     logger.info("Starting a sequential simulation run with scenario: " + randomScenario);
     simulator.runScenario(randomScenario);
+
 
     synchronized (simulator) {
       try {
@@ -112,6 +117,11 @@ public class RandomScenarioGeneratorMinVariance {
     logger.info("Starting a bundle simulation run with scenario: " + randomScenario);
     Scenario randomBundleScenario = randomScenario;
     randomBundleScenario.setOrderType(OrderType.BUNDLE);
+
+
+    // TODO remove
+    randomScenario.setValuator(new TruckIdleTimes());
+
     simulator.runScenario(randomBundleScenario);
 
     synchronized (simulator) {
@@ -216,7 +226,7 @@ public class RandomScenarioGeneratorMinVariance {
     // TODO do not hardcode algorithms
     scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
-    scenario.setValuator(new NonMonotonicLatenessValuation());
+    scenario.setValuator(new TruckIdleTimes());
     scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
 
     return scenario;

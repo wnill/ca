@@ -105,8 +105,15 @@ public class Truck {
       Bid newBid = createBid(bundle, earliestStart, latestComplete);
       if (newBid != null) {
         bids.add(newBid);
+
+        if (newBid.getId() == 6) {
+          System.out.println("break");
+        }
       }
     }
+
+    // BidFilter filter = new BidFilter();
+    // return filter.filterUnwantedBids(bids);
     return bids;
   }
 
@@ -145,7 +152,20 @@ public class Truck {
               .equals(privateJob.getDue())
           || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
               .isAfter(privateJob.getDue())) {
-        jobs.add(privateJob);
+        jobs.add(privateJob.clone());
+      }
+    }
+
+    if (jobs.size() == 3) {
+      ArrayList<Integer> ids = new ArrayList<>();
+      for (Job job : jobs) {
+        if (job.getDelivery() != null) {
+          ids.add(job.getDelivery().getId());
+        }
+      }
+
+      if (ids.contains(1) && ids.contains(4)) {
+        System.out.println("break");
       }
     }
 

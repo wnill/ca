@@ -7,7 +7,7 @@
     </layout>
   </appender>
   
-  <logger name="de.wnill.master" level="INFO"/>
+  <logger name="de.wnill.master" level="DEBUG"/>
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />

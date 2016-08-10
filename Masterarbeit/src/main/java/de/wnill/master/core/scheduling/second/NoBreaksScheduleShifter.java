@@ -138,7 +138,7 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
           linear = new Linear();
           linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i))));
           linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i - 1))));
-          problem.add(linear, ">=", duration);
+          problem.add(linear, "=", duration);
         }
       }
     }
