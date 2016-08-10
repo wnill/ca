@@ -1,6 +1,7 @@
 package de.wnill.master.core.valuation;
 
 import java.time.Duration;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -34,15 +35,18 @@ public class TruckIdleTimes implements Valuator {
     return getValuation(allJobs);
   }
 
-  @Override
+
   /**
    * ATTENTION: Works only for one truck - do not mix jobs of different trucks!
    */
-  public long getValuation(Collection<Job> jobs) {
+  public long getValuation(Collection<Job> jobs, LocalTime start) {
+
+    if (jobs.isEmpty())
+      return 0;
 
     LinkedList<Job> allJobs = new LinkedList<>(jobs);
     Collections.sort(allJobs, new JobStartTimeComparator());
-    Duration idle = Duration.ZERO;
+    Duration idle = Duration.between(start, allJobs.getFirst().getScheduledStart());
 
     for (int i = 1; i < allJobs.size(); i++) {
       idle =
@@ -53,17 +57,40 @@ public class TruckIdleTimes implements Valuator {
     return idle.toMinutes();
   }
 
+  @Override
   /**
-   * Calculates idle times for a complete schedule from multiple trucks;
+   * ATTENTION: Works only for one truck - do not mix jobs of different trucks!
+   */
+  public long getValuation(Collection<Job> jobs) {
+
+    LinkedList<Job> allJobs = new LinkedList<>(jobs);
+    Collections.sort(allJobs, new JobStartTimeComparator());
+    LocalTime start = allJobs.getFirst().getScheduledStart();
+
+    return getValuation(jobs, start);
+  }
+
+  /**
+   * Calculates idle times for a complete schedule from multiple trucks.
    * 
    * @param completeSchedule
    * @return
    */
   public long getValuation(List<List<Job>> completeSchedule) {
 
+    // find start time
+    // LocalTime earliest = LocalTime.MAX;
+    // for (List<Job> jobList : completeSchedule) {
+    // if (jobList.size() > 0 && jobList.get(0).getScheduledStart().isBefore(earliest)) {
+    // earliest = jobList.get(0).getScheduledStart();
+    // }
+    // }
+
     long totalIdleTimes = 0;
     for (List<Job> jobList : completeSchedule) {
-      totalIdleTimes += getValuation(jobList);
+      if (!jobList.isEmpty()) {
+        totalIdleTimes += getValuation(jobList, jobList.get(0).getScheduledStart());
+      }
     }
 
     return totalIdleTimes;

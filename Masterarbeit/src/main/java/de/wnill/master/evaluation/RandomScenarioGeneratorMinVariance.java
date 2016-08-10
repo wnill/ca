@@ -102,10 +102,12 @@ public class RandomScenarioGeneratorMinVariance {
     }
 
     List<List<Job>> completeSchedule = simulator.getResultMap().get(randomScenario.hashCode());
-    double seqVariance = calculateVariance(completeSchedule);
+    LinkedList<Job> deliveries = getDeliveries(completeSchedule);
+    double meanDelivery = calculateMeanDelivery(deliveries);
+    double seqVariance = calculateVariance(meanDelivery, deliveries);
     long idleTimes = idleCalc.getValuation(completeSchedule);
     logger.info("Completed sequential run. Variance: " + seqVariance + ", IdleTimes: " + idleTimes);
-    collector.putResult(OrderType.SEQUENTIAL, idleTimes, seqVariance);
+    collector.putResult(OrderType.SEQUENTIAL, idleTimes, seqVariance, meanDelivery);
 
     logger.info("Starting a bundle simulation run with scenario: " + randomScenario);
     Scenario randomBundleScenario = randomScenario;
@@ -124,9 +126,11 @@ public class RandomScenarioGeneratorMinVariance {
     }
 
     completeSchedule = simulator.getResultMap().get(randomBundleScenario.hashCode());
-    double bundleVariance = calculateVariance(completeSchedule);
+    deliveries = getDeliveries(completeSchedule);
+    meanDelivery = calculateMeanDelivery(deliveries);
+    double bundleVariance = calculateVariance(meanDelivery, deliveries);
     idleTimes = idleCalc.getValuation(completeSchedule);
-    collector.putResult(OrderType.BUNDLE, idleTimes, bundleVariance);
+    collector.putResult(OrderType.BUNDLE, idleTimes, bundleVariance, meanDelivery);
     logger.info("Completed bundle run. Variance: " + bundleVariance + ", IdleTimes: " + idleTimes);
 
     double deviation = seqVariance - bundleVariance;
@@ -138,7 +142,7 @@ public class RandomScenarioGeneratorMinVariance {
     return deviation;
   }
 
-  double calculateVariance(List<List<Job>> completeSchedule) {
+  private LinkedList<Job> getDeliveries(List<List<Job>> completeSchedule) {
     // filter only deliveries
     LinkedList<Job> deliveries = new LinkedList<>();
     for (List<Job> jobList : completeSchedule) {
@@ -150,13 +154,17 @@ public class RandomScenarioGeneratorMinVariance {
     }
     Collections.sort(deliveries, new JobStartTimeComparator());
 
+    return deliveries;
+  }
 
+  private double calculateMeanDelivery(LinkedList<Job> deliveries) {
     double meanInterval =
         Duration.between(deliveries.getFirst().getScheduledEnd(),
             deliveries.getLast().getScheduledEnd()).toMinutes();
-    meanInterval = meanInterval / (deliveries.size() - 1);
+    return meanInterval / (deliveries.size() - 1);
+  }
 
-
+  protected double calculateVariance(double meanInterval, List<Job> deliveries) {
     double variance = 0;
 
     for (int i = 1; i < deliveries.size(); i++) {

@@ -62,11 +62,11 @@ public class Simulator {
     scenario.setEndTime(LocalTime.of(23, 59));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
-    scenario.setOrderAheadMaximum(15);
-    scenario.setOrderAheadMinimum(5);
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(47));
+    scenario.setOrderAheadMaximum(14);
+    scenario.setOrderAheadMinimum(4);
     scenario.setOrderType(OrderType.BUNDLE);
-    scenario.setRoundtripTime(Duration.ofMinutes(20));
+    scenario.setRoundtripTime(Duration.ofMinutes(57));
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setStartTime(LocalTime.of(0, 0));
     scenario.setTruckCount(3);
