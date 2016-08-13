@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.wnill.master.core.scheduling.NeighborhoodSearch;
-import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
-import de.wnill.master.core.wdp.SimpleTreeSearch;
+import de.wnill.master.core.valuation.TruckIdleTimes;
+import de.wnill.master.core.wdp.SimpleTreeMinVariance;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.types.OrderType;
@@ -71,9 +71,9 @@ public class Simulator {
     scenario.setTruckCount(2);
     scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(9, 30)));
     scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(45)));
-    scenario.setValuator(new NonMonotonicLatenessValuation());
     // scenario.setValuator(new NonMonotonicLatenessValuation());
-    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
+    scenario.setValuator(new TruckIdleTimes());
+    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeMinVariance());
     // scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
 
 

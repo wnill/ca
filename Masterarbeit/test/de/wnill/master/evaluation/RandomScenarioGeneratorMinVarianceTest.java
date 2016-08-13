@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import de.wnill.master.evaluation.RandomScenarioGeneratorMinVariance;
 import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
 
@@ -51,7 +50,7 @@ public class RandomScenarioGeneratorMinVarianceTest {
     allJobs.add(jobs2);
 
     RandomScenarioGeneratorMinVariance gen = new RandomScenarioGeneratorMinVariance();
-    assertEquals(0, gen.calculateVariance(allJobs), 0.5);
+    assertEquals(0, gen.calculateVariance(0.5, gen.getDeliveries(allJobs)));
 
   }
 }

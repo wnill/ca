@@ -152,7 +152,7 @@ public class RandomScenarioGeneratorMinVariance {
     return deviation;
   }
 
-  private LinkedList<Job> getDeliveries(List<List<Job>> completeSchedule) {
+  protected LinkedList<Job> getDeliveries(List<List<Job>> completeSchedule) {
     // filter only deliveries
     LinkedList<Job> deliveries = new LinkedList<>();
     for (List<Job> jobList : completeSchedule) {

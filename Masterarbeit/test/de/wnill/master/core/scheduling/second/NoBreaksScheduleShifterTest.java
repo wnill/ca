@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -74,14 +73,14 @@ public class NoBreaksScheduleShifterTest {
     fixedTimes.put(3, 145L);
     fixedTimes.put(5, 325L);
 
-    List<Long> result = instance.solveIlp(bids, 6, allDeliveries, fixedTimes);
+    HashMap<String, Long> result = instance.solveIlp(bids, 6, allDeliveries, fixedTimes);
 
-    assertEquals(0L, (Long) result.get(0), 0);
-    assertEquals(67, (Long) result.get(1), 0);
-    assertEquals(145, (Long) result.get(2), 0);
-    assertEquals(247, (Long) result.get(3), 0);
-    assertEquals(325, (Long) result.get(4), 0);
-    assertEquals(392, (Long) result.get(5), 0);
+    assertEquals(0L, (Long) result.get("d" + 0), 0);
+    assertEquals(67, (Long) result.get("d" + 1), 0);
+    assertEquals(145, (Long) result.get("d" + 2), 0);
+    assertEquals(247, (Long) result.get("d" + 3), 0);
+    assertEquals(325, (Long) result.get("d" + 4), 0);
+    assertEquals(392, (Long) result.get("d" + 5), 0);
   }
 
   @Test

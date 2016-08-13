@@ -2,12 +2,10 @@ package de.wnill.master.core.scheduling.second;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import net.sf.javailp.Linear;
@@ -19,6 +17,7 @@ import net.sf.javailp.SolverFactory;
 import net.sf.javailp.SolverFactoryLpSolve;
 import de.wnill.master.simulator.types.Bid;
 import de.wnill.master.simulator.types.Delivery;
+import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
 public class NoBreaksScheduleShifter implements SecondPassProcessor {
@@ -51,12 +50,21 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
     }
 
     Collections.sort(deliveries, new DeliveryProposedTimeComparator());
-    List<Long> offsets = solveIlp(bids, totalDeliveries, deliveries, fixedTimes);
+    HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries, fixedTimes);
 
     // Adjust delivery times
     LocalTime startTime = deliveries.getFirst().getProposedTime();
     for (int i = 0; i < deliveries.size(); i++) {
-      deliveries.get(i).setProposedTime(startTime.plus(Duration.ofMinutes(offsets.get(i))));
+      deliveries.get(i).setProposedTime(startTime.plus(Duration.ofMinutes(offsets.get("d" + i))));
+    }
+
+    // adjust breaks
+    for (Bid bid : bids) {
+      for (Job job : bid.getUnproductiveJobs()) {
+        job.setScheduledStart(startTime.plus(
+            Duration.ofMinutes(offsets.get("b" + job.getId() + bid.getId()))).minus(
+            job.getDuration()));
+      }
     }
 
     return bids;
@@ -72,8 +80,8 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
    * @param fixedTimes
    * @return
    */
-  ArrayList<Long> solveIlp(Set<Bid> bids, int totalDeliveries, LinkedList<Delivery> deliveries,
-      HashMap<Integer, Long> fixedTimes) {
+  HashMap<String, Long> solveIlp(Set<Bid> bids, int totalDeliveries,
+      LinkedList<Delivery> deliveries, HashMap<Integer, Long> fixedTimes) {
     Problem problem = new Problem();
     Linear linear = new Linear();
     // Define objective function
@@ -133,16 +141,61 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
       if (bid.getDeliveries().size() > 1) {
         for (int i = 1; i < bid.getDeliveries().size(); i++) {
           long duration =
-              Duration.between(bid.getDeliveries().get(i - 1).getProposedTime(),
+              Duration.between(bid.getDeliveries().get(i).getStartTime(),
                   bid.getDeliveries().get(i).getProposedTime()).toMinutes();
           linear = new Linear();
           linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i))));
           linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i - 1))));
-          problem.add(linear, "=", duration);
+          problem.add(linear, ">=", duration);
+        }
+
+        // Add breaks
+        for (Job job : bid.getUnproductiveJobs()) {
+          // must be carried out before due
+          linear = new Linear();
+          linear.add(1, "b" + job.getId() + bid.getId());
+          problem.add(linear, "<=",
+              Duration.between(deliveries.getFirst().getProposedTime(), job.getDue()).toMinutes());
+
+          // also, sequence must remain the same -> find out preceeding and/or succeeding delivery
+          int firstSuccessor = -1;
+          int lastPredecessor = -1;
+          for (int i = 0; i < bid.getDeliveries().size(); i++) {
+            if (bid.getDeliveries().get(i).getProposedTime().isBefore(job.getScheduledEnd())) {
+              lastPredecessor = i;
+            }
+          }
+
+          for (int i = bid.getDeliveries().size() - 1; i >= 0; i--) {
+            if (bid.getDeliveries().get(i).getProposedTime().isAfter(job.getScheduledEnd())) {
+              firstSuccessor = i;
+            }
+          }
+
+          // Now add duration constraints of job
+          if (lastPredecessor > -1) {
+            linear = new Linear();
+            linear.add(1, "b" + job.getId() + bid.getId());
+            linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(lastPredecessor))));
+            problem.add(linear, "=", job.getDuration().toMinutes());
+          }
+
+          if (firstSuccessor > -1) {
+            linear = new Linear();
+            long duration =
+                Duration.between(bid.getDeliveries().get(firstSuccessor).getStartTime(),
+                    bid.getDeliveries().get(firstSuccessor).getProposedTime()).toMinutes();
+            linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(firstSuccessor))));
+            linear.add(-1, "b" + job.getId() + bid.getId());
+            problem.add(linear, "=", duration);
+          }
         }
       }
     }
 
+    linear = new Linear();
+    linear.add(1, "bnull52");
+    problem.add(linear, "=", 0);
 
     SolverFactory factory = new SolverFactoryLpSolve();
     factory.setParameter(Solver.VERBOSE, 0);
@@ -151,10 +204,18 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
     Solver solver = factory.get();
     Result result = solver.solve(problem);
 
-    ArrayList<Long> offsets = new ArrayList<>();
-    offsets.add(0L);
+    HashMap<String, Long> offsets = new HashMap<>();
+
+    offsets.put("d0", 0L);
     for (int i = 1; i <= deliveriesToConsider; i++) {
-      offsets.add((long) Math.round((double) result.getPrimalValue("d" + i)));
+      offsets.put("d" + i, (long) Math.round((double) result.getPrimalValue("d" + i)));
+    }
+
+    for (Bid bid : bids) {
+      for (Job job : bid.getUnproductiveJobs()) {
+        offsets.put("b" + job.getId() + bid.getId(),
+            (long) Math.round((double) result.getPrimalValue("b" + job.getId() + bid.getId())));
+      }
     }
 
     return offsets;
