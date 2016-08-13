@@ -45,6 +45,19 @@ public class Job {
     this.duration = duration;
   }
 
+  /**
+   * Extended constructor for non-productive jobs.
+   * 
+   * @param startTime
+   * @param due
+   * @param duration
+   */
+  public Job(LocalTime startTime, LocalTime due, Duration duration) {
+    this.scheduledStart = startTime;
+    this.due = due;
+    this.duration = duration;
+  }
+
 
 
   /**

@@ -2,14 +2,13 @@ package de.wnill.master.simulator;
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import de.wnill.master.core.scheduling.NeighborhoodSearch;
-import de.wnill.master.core.valuation.TruckIdleTimes;
-import de.wnill.master.core.wdp.SimpleTreeMinVariance;
+import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
+import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.types.OrderType;
@@ -64,16 +63,16 @@ public class Simulator {
     scenario.setOptimalDeliveryInterval(Duration.ofMinutes(40));
     scenario.setOrderAheadMaximum(14);
     scenario.setOrderAheadMinimum(5);
-    scenario.setOrderType(OrderType.BUNDLE);
+    scenario.setOrderType(OrderType.SEQUENTIAL);
     scenario.setRoundtripTime(Duration.ofMinutes(50));
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setStartTime(LocalTime.of(0, 0));
     scenario.setTruckCount(2);
-    scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(9, 30)));
-    scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(45)));
+    // scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(9, 30)));
+    // scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(45)));
     // scenario.setValuator(new NonMonotonicLatenessValuation());
-    scenario.setValuator(new TruckIdleTimes());
-    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeMinVariance());
+    scenario.setValuator(new NonMonotonicLatenessValuation());
+    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
     // scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
 
 

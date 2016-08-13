@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import de.wnill.master.core.bidgeneration.BidGenerator;
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.utils.ConversionHandler;
 import de.wnill.master.core.utils.PowerSet;
@@ -31,6 +32,8 @@ public class Truck {
 
   // TODO make this a parameter
   private final Duration EARLIEST_BREAK_SCHEDULING_BEFORE_DUE = Duration.ofMinutes(15);
+
+  private LocalTime lastBreak = LocalTime.MIN;
 
   /**
    * Contains a list of all truck-specific jobs that MUST be executed - pauses, maintenance, etc.
@@ -75,6 +78,27 @@ public class Truck {
 
 
   /**
+   * @return the roundtripTime
+   */
+  public Duration getRoundtripTime() {
+    return roundtripTime;
+  }
+
+
+  public List<Bid> makeBids(final List<Delivery> deliveries, LocalTime earliestStart,
+      LocalTime latestComplete, BidGenerator generator) {
+
+    if (generator == null) {
+      return makeBids(deliveries, earliestStart, latestComplete);
+    } else {
+      return generator.generateBids(this, earliestStart, latestComplete);
+    }
+  }
+
+
+  /**
+   * ATTENTION: Is now only used for sequential bids!
+   * 
    * Creates bids for the powerset of given deliveries, which are to be executed between an earliest
    * start date and latest completion date.
    * 
@@ -105,19 +129,15 @@ public class Truck {
       Bid newBid = createBid(bundle, earliestStart, latestComplete);
       if (newBid != null) {
         bids.add(newBid);
-
-        if (newBid.getId() == 6) {
-          System.out.println("break");
-        }
       }
     }
 
-    // BidFilter filter = new BidFilter();
-    // return filter.filterUnwantedBids(bids);
     return bids;
   }
 
   /**
+   * Attention! Is now only used for sequential bids!
+   * 
    * Creates a bid by scheduling a set of given jobs and then calculating a valuation, based on
    * deviations of proposed delivery times to requested delivery times.
    * 
@@ -145,29 +165,30 @@ public class Truck {
     }
 
     // insert "blockers", that is, unscheduled private jobs
-    for (Job privateJob : unscheduledPrivateJobs) {
-      if (privateJob.getTargetedStart().equals(lastDue)
-          || privateJob.getTargetedStart().isBefore(lastDue)
-          || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
-              .equals(privateJob.getDue())
-          || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
-              .isAfter(privateJob.getDue())) {
-        jobs.add(privateJob.clone());
+    // for (Job privateJob : unscheduledPrivateJobs) {
+    // if (privateJob.getTargetedStart().equals(lastDue)
+    // || privateJob.getTargetedStart().isBefore(lastDue)
+    // || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
+    // .equals(privateJob.getDue())
+    // || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
+    // .isAfter(privateJob.getDue())) {
+    // jobs.add(privateJob.clone());
+    // }
+    // }
+
+    if (Constraints.getTruckPauseAfter() != null
+        && !Constraints.getTruckPauseAfter().equals(Duration.ZERO)) {
+
+      if (lastBreak.equals(LocalTime.MIN)) {
+        lastBreak = earliestStart;
+      }
+      LocalTime breakDue = lastBreak.plus(Constraints.getTruckPauseAfter());
+
+      if (lastDue.plus(Constraints.getTruckPauseDuration()).plus(roundtripTime).isAfter(breakDue)) {
+        jobs.add(new Job(breakDue, Constraints.getTruckPauseDuration()));
       }
     }
 
-    if (jobs.size() == 3) {
-      ArrayList<Integer> ids = new ArrayList<>();
-      for (Job job : jobs) {
-        if (job.getDelivery() != null) {
-          ids.add(job.getDelivery().getId());
-        }
-      }
-
-      if (ids.contains(1) && ids.contains(4)) {
-        System.out.println("break");
-      }
-    }
 
     List<Job> bestSchedule =
         scheduler.scheduleJobs(jobs, earliestStart, latestComplete,
@@ -187,6 +208,7 @@ public class Truck {
         deliveries.add(delivery);
       } else {
         unproductiveJobs.add(job);
+        lastBreak = job.getScheduledEnd();
       }
     }
 
@@ -287,6 +309,22 @@ public class Truck {
    */
   public void setSchedule(List<Job> schedule) {
     this.schedule = new ArrayList<Job>(schedule);
+  }
+
+
+  /**
+   * @return the lastBreak
+   */
+  public LocalTime getLastBreak() {
+    return lastBreak;
+  }
+
+
+  /**
+   * @param lastBreak the lastBreak to set
+   */
+  public void setLastBreak(LocalTime lastBreak) {
+    this.lastBreak = lastBreak;
   }
 
 

@@ -23,6 +23,19 @@ public class Delivery {
   }
 
   /**
+   * Constructor for bidder-driven schedule generation
+   * 
+   * @param startTime
+   * @param proposedTime
+   */
+  public Delivery(int id, LocalTime startTime, LocalTime proposedTime) {
+    this.id = id;
+    this.startTime = startTime;
+    this.proposedTime = proposedTime;
+    this.requestedTime = proposedTime;
+  }
+
+  /**
    * @return the id
    */
   public int getId() {
@@ -84,9 +97,8 @@ public class Delivery {
    * Returns a deep copy of this object.
    */
   public Delivery clone() {
-    Delivery clone = new Delivery(this.getId(), this.getRequestedTime());
-    clone.setProposedTime(this.proposedTime);
-    clone.setStartTime(this.getStartTime());
+    Delivery clone = new Delivery(this.getId(), this.getStartTime(), this.getProposedTime());
+    clone.setRequestedTime(this.requestedTime);
     return clone;
   }
 
@@ -102,6 +114,7 @@ public class Delivery {
     result = prime * result + id;
     result = prime * result + ((proposedTime == null) ? 0 : proposedTime.hashCode());
     result = prime * result + ((requestedTime == null) ? 0 : requestedTime.hashCode());
+    result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
     return result;
   }
 
@@ -130,6 +143,11 @@ public class Delivery {
       if (other.requestedTime != null)
         return false;
     } else if (!requestedTime.equals(other.requestedTime))
+      return false;
+    if (startTime == null) {
+      if (other.startTime != null)
+        return false;
+    } else if (!startTime.equals(other.startTime))
       return false;
     return true;
   }

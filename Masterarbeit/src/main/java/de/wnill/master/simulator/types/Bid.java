@@ -30,6 +30,10 @@ public class Bid {
 
   private LinkedList<Job> unproductiveJobs = new LinkedList<>();
 
+  private Duration maxShiftLater = Duration.ZERO;
+
+  private Duration maxShiftEarlier = Duration.ZERO;
+
   public Bid(Collection<Delivery> deliveries, Collection<Job> unproductiveJobs, Truck truck,
       long valuation) {
 
@@ -90,6 +94,38 @@ public class Bid {
    */
   public Duration getMaxLateness() {
     return maxLateness;
+  }
+
+
+  /**
+   * @return the maxShiftLater
+   */
+  public Duration getMaxShiftLater() {
+    return maxShiftLater;
+  }
+
+
+  /**
+   * @param maxShiftLater the maxShiftLater to set
+   */
+  public void setMaxShiftLater(Duration maxShiftLater) {
+    this.maxShiftLater = maxShiftLater;
+  }
+
+
+  /**
+   * @return the maxShiftEarlier
+   */
+  public Duration getMaxShiftEarlier() {
+    return maxShiftEarlier;
+  }
+
+
+  /**
+   * @param maxShiftEarlier the maxShiftEarlier to set
+   */
+  public void setMaxShiftEarlier(Duration maxShiftEarlier) {
+    this.maxShiftEarlier = maxShiftEarlier;
   }
 
 

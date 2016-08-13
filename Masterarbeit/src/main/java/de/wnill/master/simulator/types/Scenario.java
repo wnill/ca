@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.List;
 
+import de.wnill.master.core.bidgeneration.BidGenerator;
 import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.scheduling.second.SecondPassProcessor;
 import de.wnill.master.core.valuation.Valuator;
@@ -31,6 +32,8 @@ public class Scenario {
   private SchedulingAlgorithm schedulingAlgorithm;
 
   private SecondPassProcessor secondPassProcessor;
+
+  private BidGenerator bidGenerator;
 
   private List<LocalTime> truckBreaksDue;
 
@@ -158,6 +161,20 @@ public class Scenario {
    */
   public OrderType getOrderType() {
     return orderType;
+  }
+
+  /**
+   * @return the bidGenerator
+   */
+  public BidGenerator getBidGenerator() {
+    return bidGenerator;
+  }
+
+  /**
+   * @param bidGenerator the bidGenerator to set
+   */
+  public void setBidGenerator(BidGenerator bidGenerator) {
+    this.bidGenerator = bidGenerator;
   }
 
   /**
@@ -297,6 +314,7 @@ public class Scenario {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = prime * result + ((bidGenerator == null) ? 0 : bidGenerator.hashCode());
     result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
     result = prime * result + ((firstDockingTime == null) ? 0 : firstDockingTime.hashCode());
     result = prime * result + ((offloadingDuration == null) ? 0 : offloadingDuration.hashCode());
@@ -308,6 +326,7 @@ public class Scenario {
     result = prime * result + ((orderType == null) ? 0 : orderType.hashCode());
     result = prime * result + ((roundtripTime == null) ? 0 : roundtripTime.hashCode());
     result = prime * result + ((schedulingAlgorithm == null) ? 0 : schedulingAlgorithm.hashCode());
+    result = prime * result + ((secondPassProcessor == null) ? 0 : secondPassProcessor.hashCode());
     result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
     result = prime * result + ((truckBreakDurations == null) ? 0 : truckBreakDurations.hashCode());
     result = prime * result + ((truckBreaksDue == null) ? 0 : truckBreaksDue.hashCode());
@@ -330,7 +349,8 @@ public class Scenario {
     return "Scenario [startTime=" + startTime + ", endTime=" + endTime + ", orderType=" + orderType
         + ", truckCount=" + truckCount + ", roundtripTime=" + roundtripTime
         + ", offloadingDuration=" + offloadingDuration + ", schedulingAlgorithm="
-        + schedulingAlgorithm + ", truckBreaks=" + truckBreaksDue + ", truckBreakDurations="
+        + schedulingAlgorithm + ", secondPassProcessor=" + secondPassProcessor + ", bidGenerator="
+        + bidGenerator + ", truckBreaksDue=" + truckBreaksDue + ", truckBreakDurations="
         + truckBreakDurations + ", firstDockingTime=" + firstDockingTime
         + ", optimalDeliveryInterval=" + optimalDeliveryInterval + ", orderAheadMinimum="
         + orderAheadMinimum + ", orderAheadMaximum=" + orderAheadMaximum + ", valuator=" + valuator
@@ -351,6 +371,11 @@ public class Scenario {
     if (getClass() != obj.getClass())
       return false;
     Scenario other = (Scenario) obj;
+    if (bidGenerator == null) {
+      if (other.bidGenerator != null)
+        return false;
+    } else if (!bidGenerator.equals(other.bidGenerator))
+      return false;
     if (endTime == null) {
       if (other.endTime != null)
         return false;
@@ -386,6 +411,11 @@ public class Scenario {
       if (other.schedulingAlgorithm != null)
         return false;
     } else if (!schedulingAlgorithm.equals(other.schedulingAlgorithm))
+      return false;
+    if (secondPassProcessor == null) {
+      if (other.secondPassProcessor != null)
+        return false;
+    } else if (!secondPassProcessor.equals(other.secondPassProcessor))
       return false;
     if (startTime == null) {
       if (other.startTime != null)
