@@ -60,7 +60,7 @@ public class Simulator {
     scenario.setEndTime(LocalTime.of(23, 59));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(40));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(20));
     scenario.setOrderAheadMaximum(14);
     scenario.setOrderAheadMinimum(5);
     scenario.setOrderType(OrderType.SEQUENTIAL);
@@ -68,6 +68,8 @@ public class Simulator {
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setStartTime(LocalTime.of(0, 0));
     scenario.setTruckCount(2);
+    Constraints.setTruckPauseAfter(Duration.ofMinutes(90));
+    Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
     // scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(9, 30)));
     // scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(45)));
     // scenario.setValuator(new NonMonotonicLatenessValuation());

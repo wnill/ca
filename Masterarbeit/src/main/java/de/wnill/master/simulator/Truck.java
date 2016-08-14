@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -126,9 +125,11 @@ public class Truck {
 
     for (Set<Delivery> bundle : powerset) {
       // Now we have a bundle containing one possible combination of deliveries
-      Bid newBid = createBid(bundle, earliestStart, latestComplete);
-      if (newBid != null) {
-        bids.add(newBid);
+      if (!bundle.isEmpty()) {
+        Bid newBid = createBid(bundle, earliestStart, latestComplete);
+        if (newBid != null) {
+          bids.add(newBid);
+        }
       }
     }
 
@@ -164,17 +165,6 @@ public class Truck {
       }
     }
 
-    // insert "blockers", that is, unscheduled private jobs
-    // for (Job privateJob : unscheduledPrivateJobs) {
-    // if (privateJob.getTargetedStart().equals(lastDue)
-    // || privateJob.getTargetedStart().isBefore(lastDue)
-    // || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
-    // .equals(privateJob.getDue())
-    // || earliestStart.plus(privateJob.getDuration()).plus(minimumRequiredTime)
-    // .isAfter(privateJob.getDue())) {
-    // jobs.add(privateJob.clone());
-    // }
-    // }
 
     if (Constraints.getTruckPauseAfter() != null
         && !Constraints.getTruckPauseAfter().equals(Duration.ZERO)) {
@@ -184,8 +174,9 @@ public class Truck {
       }
       LocalTime breakDue = lastBreak.plus(Constraints.getTruckPauseAfter());
 
-      if (lastDue.plus(Constraints.getTruckPauseDuration()).plus(roundtripTime).isAfter(breakDue)) {
-        jobs.add(new Job(breakDue, Constraints.getTruckPauseDuration()));
+      if (earliestStart.plus(Constraints.getTruckPauseDuration()).plus(roundtripTime)
+          .isAfter(breakDue)) {
+        jobs.add(new Job(earliestStart, breakDue, Constraints.getTruckPauseDuration()));
       }
     }
 
@@ -208,7 +199,6 @@ public class Truck {
         deliveries.add(delivery);
       } else {
         unproductiveJobs.add(job);
-        lastBreak = job.getScheduledEnd();
       }
     }
 
@@ -226,13 +216,17 @@ public class Truck {
     for (Job job : bid.getUnproductiveJobs()) {
       job.setId("B");
       schedule.add(job);
+      lastBreak = job.getScheduledEnd();
+    }
 
-      Iterator<Job> it = unscheduledPrivateJobs.iterator();
-      while (it.hasNext()) {
-        Job unscheduled = it.next();
-        if (unscheduled.getDue().equals(job.getDue())
-            && unscheduled.getDuration().equals(job.getDuration())) {
-          it.remove();
+    // Check for gaps between deliveries. If there is one which is longer than a break duration,
+    // this can be considered as break
+    if (schedule.size() > 1) {
+      for (int i = 1; i < schedule.size() - 1; i++) {
+        if (Duration.between(schedule.get(i - 1).getScheduledEnd(),
+            schedule.get(i).getScheduledStart()).compareTo(Constraints.getTruckPauseDuration()) > 0
+            && schedule.get(i).getScheduledStart().isAfter(lastBreak)) {
+          lastBreak = schedule.get(i).getScheduledStart();
         }
       }
     }
@@ -242,37 +236,23 @@ public class Truck {
     }
 
     Collections.sort(schedule, new JobStartTimeComparator());
-
-    // Check if there is an unproductive job left, which must be scheduled next urgently
-    Iterator<Job> it = unscheduledPrivateJobs.iterator();
-    while (it.hasNext()) {
-      Job unscheduled = it.next();
-      if (Duration.between(schedule.get(schedule.size() - 1).getScheduledEnd(),
-          unscheduled.getDue()).compareTo(roundtripTime) < 0) {
-        unscheduled.setScheduledStart(schedule.get(schedule.size() - 1).getScheduledEnd());
-        schedule.add(unscheduled);
-        it.remove();
-      }
-    }
   }
 
   /**
-   * No bids were awarded in this bid round. Thus, schedule unproductive jobs if possible.
+   * No bids were awarded in this bid round. Thus, schedule unproductive jobs if possible and
+   * necessary.
    * 
    */
   public void rejectAllBids() {
     if (!schedule.isEmpty()) {
       LocalTime begin = schedule.get(schedule.size() - 1).getScheduledEnd();
-      Iterator<Job> it = unscheduledPrivateJobs.iterator();
-      while (it.hasNext()) {
-        Job job = it.next();
-        if (Duration.between(begin.plus(job.getDuration()), job.getDue()).compareTo(
-            EARLIEST_BREAK_SCHEDULING_BEFORE_DUE) < 0) {
-          job.setScheduledStart(begin);
-          schedule.add(job);
-          it.remove();
-          begin = job.getScheduledEnd();
-        }
+      if (begin.plus(roundtripTime).plus(Constraints.getTruckPauseDuration())
+          .isAfter(lastBreak.plus(Constraints.getTruckPauseAfter()))) {
+        Job breakJob =
+            new Job(begin, lastBreak.plus(Constraints.getTruckPauseAfter()),
+                Constraints.getTruckPauseDuration());
+        schedule.add(breakJob);
+        lastBreak = breakJob.getScheduledEnd();
       }
     }
   }
