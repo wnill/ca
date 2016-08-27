@@ -20,7 +20,7 @@ import de.wnill.master.simulator.types.Delivery;
 import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
-public class NoBreaksScheduleShifter implements SecondPassProcessor {
+public class MinVarAndIdleShifter implements SecondPassProcessor {
 
   @Override
   public Set<Bid> updateBids(Set<Bid> originalBids) {
@@ -86,11 +86,32 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
     Linear linear = new Linear();
     // Define objective function
     int deliveriesToConsider = totalDeliveries - 1;
+    // Minimize completion time variance
     for (int i = 1; i <= deliveriesToConsider; i++) {
       linear.add(1, "C" + i);
       problem.setVarType("C" + i, Double.class);
     }
+
+    // Minimize idle times
+    // for (Bid bid : bids) {
+    // linear.add(3.9, "d" + (deliveries.indexOf(bid.getDeliveries().get(0))));
+    // }
+    // linear.add(0.3, "d5");
+    // linear.add(-0.3, "d1");
+    // linear.add(0.3, "d4");
     problem.setObjective(linear, OptType.MIN);
+
+
+    //
+    // linear = new Linear();
+    // linear.add(1, "C1");
+    // linear.add(1, "C2");
+    // linear.add(1, "C3");
+    // linear.add(1, "C4");
+    // linear.add(1, "C5");
+    // problem.add(linear, ">=", 5);
+
+
 
     // Add constraints
     linear = new Linear();
@@ -127,11 +148,11 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
       problem.add(linear, "<=", 0);
 
       // all deliveries of the truck which start first are assumed to be fixed
-      if (fixedTimes.containsKey(delivery.getId())) {
-        linear = new Linear();
-        linear.add(1, "d" + deliveryCounter);
-        problem.add(linear, "=", fixedTimes.get(delivery.getId()));
-      }
+      // if (fixedTimes.containsKey(delivery.getId())) {
+      // linear = new Linear();
+      // linear.add(1, "d" + deliveryCounter);
+      // problem.add(linear, "=", fixedTimes.get(delivery.getId()));
+      // }
 
       deliveryCounter++;
     }
@@ -146,7 +167,7 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
           linear = new Linear();
           linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i))));
           linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(i - 1))));
-          problem.add(linear, "=", duration);
+          problem.add(linear, ">=", duration);
         }
 
         // Add breaks
@@ -172,7 +193,7 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
             linear = new Linear();
             linear.add(1, "b" + job.getId() + bid.getId());
             linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(lastPredecessor))));
-            problem.add(linear, "=", job.getDuration().toMinutes());
+            problem.add(linear, ">=", job.getDuration().toMinutes());
           }
 
           if (firstSuccessor > -1) {
@@ -182,7 +203,7 @@ public class NoBreaksScheduleShifter implements SecondPassProcessor {
                     bid.getDeliveries().get(firstSuccessor).getProposedTime()).toMinutes();
             linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(firstSuccessor))));
             linear.add(-1, "b" + job.getId() + bid.getId());
-            problem.add(linear, "=", duration);
+            problem.add(linear, ">=", duration);
           }
         }
       }

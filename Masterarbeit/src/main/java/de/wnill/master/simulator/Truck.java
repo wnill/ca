@@ -219,6 +219,10 @@ public class Truck {
       lastBreak = job.getScheduledEnd();
     }
 
+    for (Delivery delivery : bid.getDeliveries()) {
+      schedule.add(ConversionHandler.convertDeliveryToJob(delivery, roundtripTime));
+    }
+
     // Check for gaps between deliveries. If there is one which is longer than a break duration,
     // this can be considered as break
     if (schedule.size() > 1) {
@@ -229,10 +233,8 @@ public class Truck {
           lastBreak = schedule.get(i).getScheduledStart();
         }
       }
-    }
-
-    for (Delivery delivery : bid.getDeliveries()) {
-      schedule.add(ConversionHandler.convertDeliveryToJob(delivery, roundtripTime));
+    } else if (schedule.size() == 1) {
+      lastBreak = schedule.get(0).getScheduledStart();
     }
 
     Collections.sort(schedule, new JobStartTimeComparator());

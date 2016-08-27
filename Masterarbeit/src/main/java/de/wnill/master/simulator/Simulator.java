@@ -3,18 +3,27 @@ package de.wnill.master.simulator;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.wnill.master.core.bidgeneration.FullScheduleGenerator;
 import de.wnill.master.core.scheduling.NeighborhoodSearch;
+import de.wnill.master.core.scheduling.second.MinVarAndIdleShifter;
 import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
-import de.wnill.master.core.wdp.SimpleTreeSearch;
+import de.wnill.master.core.wdp.EveryOneIsAWinner;
+import de.wnill.master.evaluation.EvaluationUtils;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
 
 public class Simulator {
+
+  private static final Logger logger = LoggerFactory.getLogger(Simulator.class);
 
   /** Maps scenario hashcode -> list of all schedules */
   private Map<Integer, List<List<Job>>> resultMap = new HashMap<>();
@@ -57,26 +66,23 @@ public class Simulator {
     // scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
 
     Scenario scenario = new Scenario();
-    scenario.setEndTime(LocalTime.of(23, 59));
+    scenario.setEndTime(LocalTime.of(10, 0));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(20));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(30));
     scenario.setOrderAheadMaximum(14);
     scenario.setOrderAheadMinimum(5);
-    scenario.setOrderType(OrderType.SEQUENTIAL);
+    scenario.setOrderType(OrderType.BUNDLE);
     scenario.setRoundtripTime(Duration.ofMinutes(50));
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setStartTime(LocalTime.of(0, 0));
     scenario.setTruckCount(2);
-    Constraints.setTruckPauseAfter(Duration.ofMinutes(90));
+    Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
     Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
-    // scenario.setTruckBreaksDue(Arrays.asList(LocalTime.of(9, 30)));
-    // scenario.setTruckBreakDurations(Arrays.asList(Duration.ofMinutes(45)));
-    // scenario.setValuator(new NonMonotonicLatenessValuation());
     scenario.setValuator(new NonMonotonicLatenessValuation());
-    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
-    // scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
-
+    scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
+    scenario.setSecondPassProcessor(new MinVarAndIdleShifter());
+    scenario.setBidGenerator(new FullScheduleGenerator());
 
 
     Engine engine = new Engine(new Condition() {
@@ -99,6 +105,15 @@ public class Simulator {
     synchronized (this) {
       notifyAll();
     }
+
+    LinkedList<Job> schedule = EvaluationUtils.unionSchedules(schedules);
+    logger.info("-----------------------------------------------");
+    logger.info("CompTimeVar: "
+        + EvaluationUtils.calculateVariance(EvaluationUtils.calculateMeanDelivery(schedule),
+            schedule));
+    logger.info("IdleTimes: " + EvaluationUtils.calculateIdleTimes(schedules));
+    logger.info("Scenario: " + scenario);
+    logger.info("-----------------------------------------------");
   }
 
 

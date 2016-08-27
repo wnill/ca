@@ -15,7 +15,6 @@ public class FullScheduleGenerator implements BidGenerator {
   @Override
   public List<Bid> generateBids(Truck truck, LocalTime startTime, LocalTime endTime) {
 
-
     // First job is always a delivery
     List<Job> existingSchedule = truck.getSchedule();
     LocalTime earliestStart = startTime;
@@ -26,47 +25,44 @@ public class FullScheduleGenerator implements BidGenerator {
     }
 
     List<Bid> bids = new LinkedList<>();
-
-
     int offset = 1;
 
-    while (true) {
+    // while (true) {
 
-      LocalTime breakDue = earliestStart.plus(Constraints.getTruckPauseAfter());
-      if (!truck.getLastBreak().equals(LocalTime.MIN)) {
-        breakDue = truck.getLastBreak().plus(Constraints.getTruckPauseAfter());
-      }
+    LocalTime breakDue = earliestStart.plus(Constraints.getTruckPauseAfter());
+    if (!truck.getLastBreak().equals(LocalTime.MIN)) {
+      breakDue = truck.getLastBreak().plus(Constraints.getTruckPauseAfter());
+    }
 
-      // Create one bid
-      LinkedList<Delivery> deliveries = new LinkedList<>();
-      List<Job> unprodJob = new LinkedList<>();
-      LocalTime nextStart = earliestStart;
+    // Create one bid
+    LinkedList<Delivery> deliveries = new LinkedList<>();
+    List<Job> unprodJob = new LinkedList<>();
+    LocalTime nextStart = earliestStart;
+
+    // if (nextStart.plus(Constraints.getTruckPauseDuration())
+    // .plus((truck.getRoundtripTime().multipliedBy(offset))).isAfter(breakDue)) {
+    // break;
+    // }
+    int counter = 1;
+
+    // first job is always a delivery
+    while (nextStart.plus(truck.getRoundtripTime()).isBefore(endTime)) {
 
       if (nextStart.plus(Constraints.getTruckPauseDuration())
           .plus((truck.getRoundtripTime().multipliedBy(offset))).isAfter(breakDue)) {
-        break;
+        unprodJob.add(new Job(nextStart, breakDue, Constraints.getTruckPauseDuration()));
+        nextStart = nextStart.plus(Constraints.getTruckPauseDuration());
+        breakDue = nextStart.plus(Constraints.getTruckPauseAfter());
+      } else {
+        deliveries.add(new Delivery(truck.getId() * 10 + counter, nextStart, nextStart.plus(truck
+            .getRoundtripTime())));
+        nextStart = nextStart.plus(truck.getRoundtripTime());
+        counter++;
       }
-      int counter = 1;
-
-      // first job is always a delivery
-      while (nextStart.isBefore(endTime)) {
-
-        if (nextStart.plus(Constraints.getTruckPauseDuration())
-            .plus((truck.getRoundtripTime().multipliedBy(offset))).isAfter(breakDue)) {
-          unprodJob.add(new Job(nextStart, breakDue, Constraints.getTruckPauseDuration()));
-          nextStart = nextStart.plus(Constraints.getTruckPauseDuration());
-          breakDue = nextStart.plus(Constraints.getTruckPauseAfter());
-        } else {
-          deliveries.add(new Delivery(truck.getId() * 10 + counter, nextStart, nextStart.plus(truck
-              .getRoundtripTime())));
-          nextStart = nextStart.plus(truck.getRoundtripTime());
-          counter++;
-        }
-      }
-      bids.add(new Bid(deliveries, unprodJob, truck, 0));
-      offset++;
     }
-
+    bids.add(new Bid(deliveries, unprodJob, truck, 0));
+    // offset++;
+    // }
 
     return bids;
   }

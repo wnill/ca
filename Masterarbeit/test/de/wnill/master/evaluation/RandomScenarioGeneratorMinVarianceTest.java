@@ -50,7 +50,7 @@ public class RandomScenarioGeneratorMinVarianceTest {
     allJobs.add(jobs2);
 
     RandomScenarioGeneratorMinVariance gen = new RandomScenarioGeneratorMinVariance();
-    assertEquals(0, gen.calculateVariance(0.5, gen.getDeliveries(allJobs)));
+    assertEquals(0, gen.calculateVariance(0.5, gen.unionSchedules(allJobs)));
 
   }
 }

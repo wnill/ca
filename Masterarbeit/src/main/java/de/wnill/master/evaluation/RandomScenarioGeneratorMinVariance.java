@@ -3,7 +3,6 @@ package de.wnill.master.evaluation;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalTime;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,7 +21,6 @@ import de.wnill.master.simulator.Simulator;
 import de.wnill.master.simulator.types.Job;
 import de.wnill.master.simulator.types.OrderType;
 import de.wnill.master.simulator.types.Scenario;
-import de.wnill.master.simulator.utils.JobStartTimeComparator;
 
 public class RandomScenarioGeneratorMinVariance {
 
@@ -107,9 +105,9 @@ public class RandomScenarioGeneratorMinVariance {
     }
 
     List<List<Job>> completeSchedule = simulator.getResultMap().get(randomScenario.hashCode());
-    LinkedList<Job> deliveries = getDeliveries(completeSchedule);
-    double meanDelivery = calculateMeanDelivery(deliveries);
-    double seqVariance = calculateVariance(meanDelivery, deliveries);
+    LinkedList<Job> deliveries = EvaluationUtils.unionSchedules(completeSchedule);
+    double meanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
+    double seqVariance = EvaluationUtils.calculateVariance(meanDelivery, deliveries);
     long idleTimes = idleCalc.getValuation(completeSchedule);
     logger.info("Completed sequential run. Variance: " + seqVariance + ", IdleTimes: " + idleTimes);
     collector.putResult(OrderType.SEQUENTIAL, idleTimes, seqVariance, meanDelivery);
@@ -136,9 +134,9 @@ public class RandomScenarioGeneratorMinVariance {
     }
 
     completeSchedule = simulator.getResultMap().get(randomBundleScenario.hashCode());
-    deliveries = getDeliveries(completeSchedule);
-    meanDelivery = calculateMeanDelivery(deliveries);
-    double bundleVariance = calculateVariance(meanDelivery, deliveries);
+    deliveries = EvaluationUtils.unionSchedules(completeSchedule);
+    meanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
+    double bundleVariance = EvaluationUtils.calculateVariance(meanDelivery, deliveries);
     idleTimes = idleCalc.getValuation(completeSchedule);
     collector.putResult(OrderType.BUNDLE, idleTimes, bundleVariance, meanDelivery);
     logger.info("Completed bundle run. Variance: " + bundleVariance + ", IdleTimes: " + idleTimes);
@@ -152,39 +150,7 @@ public class RandomScenarioGeneratorMinVariance {
     return deviation;
   }
 
-  protected LinkedList<Job> getDeliveries(List<List<Job>> completeSchedule) {
-    // filter only deliveries
-    LinkedList<Job> deliveries = new LinkedList<>();
-    for (List<Job> jobList : completeSchedule) {
-      for (Job job : jobList) {
-        if (job.getDelivery() != null) {
-          deliveries.add(job);
-        }
-      }
-    }
-    Collections.sort(deliveries, new JobStartTimeComparator());
 
-    return deliveries;
-  }
-
-  private double calculateMeanDelivery(LinkedList<Job> deliveries) {
-    double meanInterval =
-        Duration.between(deliveries.getFirst().getScheduledEnd(),
-            deliveries.getLast().getScheduledEnd()).toMinutes();
-    return meanInterval / (deliveries.size() - 1);
-  }
-
-  protected double calculateVariance(double meanInterval, List<Job> deliveries) {
-    double variance = 0;
-
-    for (int i = 1; i < deliveries.size(); i++) {
-      long interval =
-          Duration.between(deliveries.get(i - 1).getScheduledEnd(),
-              deliveries.get(i).getScheduledEnd()).toMinutes();
-      variance += (interval - meanInterval) * (interval - meanInterval);
-    }
-    return variance;
-  }
 
   /**
    * Generates a scenario with random interval, order count, roundtrip time and truck count.
