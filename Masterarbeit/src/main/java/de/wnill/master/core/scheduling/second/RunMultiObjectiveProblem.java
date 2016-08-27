@@ -11,7 +11,7 @@ public class RunMultiObjectiveProblem {
   public static void main(String[] args) {
     NondominatedPopulation result =
         new Executor().withAlgorithm("GDE3").withProblemClass(MultiObjectiveProblem.class)
-            .withMaxEvaluations(50000).run();
+            .withMaxEvaluations(90000).run();
 
     for (Solution solution : result) {
       if (!solution.violatesConstraints()) {

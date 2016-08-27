@@ -7,7 +7,7 @@ import org.moeaframework.problem.AbstractProblem;
 public class MultiObjectiveProblem extends AbstractProblem {
 
   public MultiObjectiveProblem() {
-    super(13, 2, 19);
+    super(13, 2, 20);
   }
 
   @Override
@@ -75,16 +75,18 @@ public class MultiObjectiveProblem extends AbstractProblem {
     solution.setConstraint(17, cons17 >= 15 ? 0.0 : cons17);
     solution.setConstraint(18, cons18 >= 50 ? 0.0 : cons18);
 
+    solution.setConstraint(19, d2 - d0 > 0 ? 0.0 : d2 - d0);
+
   }
 
   @Override
   public Solution newSolution() {
-    Solution solution = new Solution(13, 2, 19);
-    solution.setVariable(0, EncodingUtils.newReal(0.0, 30.0));
-    solution.setVariable(1, EncodingUtils.newReal(0.0, 30.0));
-    solution.setVariable(2, EncodingUtils.newReal(0.0, 30.0));
-    solution.setVariable(3, EncodingUtils.newReal(0.0, 30.0));
-    solution.setVariable(4, EncodingUtils.newReal(0.0, 30.0));
+    Solution solution = new Solution(13, 2, 20);
+    solution.setVariable(0, EncodingUtils.newReal(0.0, 40.0));
+    solution.setVariable(1, EncodingUtils.newReal(0.0, 40.0));
+    solution.setVariable(2, EncodingUtils.newReal(0.0, 40.0));
+    solution.setVariable(3, EncodingUtils.newReal(0.0, 40.0));
+    solution.setVariable(4, EncodingUtils.newReal(0.0, 40.0));
     solution.setVariable(5, EncodingUtils.newReal(0.0, 200.0));
     solution.setVariable(6, EncodingUtils.newReal(0.0, 200.0));
     solution.setVariable(7, EncodingUtils.newReal(0.0, 200.0));
