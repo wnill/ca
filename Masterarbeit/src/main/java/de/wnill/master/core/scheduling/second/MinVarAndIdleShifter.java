@@ -22,6 +22,8 @@ import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
 public class MinVarAndIdleShifter implements SecondPassProcessor {
 
+  private double weightOfVariance = 0.2;
+
   @Override
   public Set<Bid> updateBids(Set<Bid> originalBids) {
     // First, determine which truck begins first - its schedule will remain fixed
@@ -88,7 +90,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     int deliveriesToConsider = totalDeliveries - 1;
     // Minimize completion time variance
     for (int i = 1; i <= deliveriesToConsider; i++) {
-      linear.add(1, "C" + i);
+      linear.add(weightOfVariance, "C" + i);
       problem.setVarType("C" + i, Double.class);
     }
 
@@ -96,9 +98,10 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     // for (Bid bid : bids) {
     // linear.add(3.9, "d" + (deliveries.indexOf(bid.getDeliveries().get(0))));
     // }
-    // linear.add(0.3, "d5");
-    // linear.add(-0.3, "d1");
-    // linear.add(0.3, "d4");
+    linear.add(1 - weightOfVariance, "d5");
+    linear.add(-(1 - weightOfVariance), "d1");
+    linear.add(1 - weightOfVariance, "d4");
+    linear.add(-(1 - weightOfVariance), "d0");
     problem.setObjective(linear, OptType.MIN);
 
 
