@@ -22,7 +22,7 @@ import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
 public class MinVarAndIdleShifter implements SecondPassProcessor {
 
-  private double weightOfVariance = 0.2;
+  private double weightOfVariance = 0.8;
 
   @Override
   public Set<Bid> updateBids(Set<Bid> originalBids) {
@@ -105,14 +105,14 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     problem.setObjective(linear, OptType.MIN);
 
 
-    //
-    // linear = new Linear();
-    // linear.add(1, "C1");
-    // linear.add(1, "C2");
-    // linear.add(1, "C3");
-    // linear.add(1, "C4");
-    // linear.add(1, "C5");
-    // problem.add(linear, ">=", 5);
+
+    linear = new Linear();
+    linear.add(1, "C1");
+    linear.add(1, "C2");
+    linear.add(1, "C3");
+    linear.add(1, "C4");
+    linear.add(1, "C5");
+    problem.add(linear, ">=", 5);
 
 
 
