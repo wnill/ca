@@ -22,16 +22,26 @@ import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
 public class MinVarAndIdleShifter implements SecondPassProcessor {
 
-  private double weightOfVariance = 0.8;
+  private double weightOfVariance = 1;
+
+  private double varianceLowerBound = 0;
+
+  public MinVarAndIdleShifter() {}
+
+  public MinVarAndIdleShifter(double varianceLowerBound) {
+    this.varianceLowerBound = varianceLowerBound;
+  }
+
 
   @Override
   public Set<Bid> updateBids(Set<Bid> originalBids) {
+
     // First, determine which truck begins first - its schedule will remain fixed
     Set<Bid> bids = new HashSet<>(originalBids);
     LocalTime firstDelivery = LocalTime.MAX;
     Bid firstStarterBid = null;
     int totalDeliveries = 0;
-    // DeliveryID -> duration
+
     LinkedList<Delivery> deliveries = new LinkedList<>();
     for (Bid bid : bids) {
       for (Delivery delivery : bid.getDeliveries()) {
@@ -44,6 +54,10 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
       }
     }
 
+    if (firstStarterBid == null) {
+      return originalBids;
+    }
+
     // Save a list of all fixed times
     HashMap<Integer, Long> fixedTimes = new HashMap<>();
     for (Delivery delivery : firstStarterBid.getDeliveries()) {
@@ -53,6 +67,10 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
     Collections.sort(deliveries, new DeliveryProposedTimeComparator());
     HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries, fixedTimes);
+
+    if (offsets.isEmpty()) {
+      return originalBids;
+    }
 
     // Adjust delivery times
     LocalTime startTime = deliveries.getFirst().getProposedTime();
@@ -98,21 +116,17 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     // for (Bid bid : bids) {
     // linear.add(3.9, "d" + (deliveries.indexOf(bid.getDeliveries().get(0))));
     // }
-    linear.add(1 - weightOfVariance, "d5");
-    linear.add(-(1 - weightOfVariance), "d1");
-    linear.add(1 - weightOfVariance, "d4");
-    linear.add(-(1 - weightOfVariance), "d0");
+    // linear.add(1 - weightOfVariance, "d5");
+    // linear.add(-(1 - weightOfVariance), "d1");
+    // linear.add(1 - weightOfVariance, "d4");
+    // linear.add(-(1 - weightOfVariance), "d0");
     problem.setObjective(linear, OptType.MIN);
 
-
-
     linear = new Linear();
-    linear.add(1, "C1");
-    linear.add(1, "C2");
-    linear.add(1, "C3");
-    linear.add(1, "C4");
-    linear.add(1, "C5");
-    problem.add(linear, ">=", 5);
+    for (int i = 1; i <= deliveriesToConsider; i++) {
+      linear.add(1, "C" + i);
+    }
+    problem.add(linear, ">=", varianceLowerBound);
 
 
 
@@ -220,19 +234,61 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     Result result = solver.solve(problem);
 
     HashMap<String, Long> offsets = new HashMap<>();
+    if (result != null) {
 
-    offsets.put("d0", 0L);
-    for (int i = 1; i <= deliveriesToConsider; i++) {
-      offsets.put("d" + i, (long) Math.round((double) result.getPrimalValue("d" + i)));
-    }
+      offsets.put("d0", 0L);
+      for (int i = 1; i <= deliveriesToConsider; i++) {
+        offsets.put("d" + i, (long) Math.round((double) result.getPrimalValue("d" + i)));
+      }
 
-    for (Bid bid : bids) {
-      for (Job job : bid.getUnproductiveJobs()) {
-        offsets.put("b" + job.getId() + bid.getId(),
-            (long) Math.round((double) result.getPrimalValue("b" + job.getId() + bid.getId())));
+      for (Bid bid : bids) {
+        for (Job job : bid.getUnproductiveJobs()) {
+          offsets.put("b" + job.getId() + bid.getId(),
+              (long) Math.round((double) result.getPrimalValue("b" + job.getId() + bid.getId())));
+        }
       }
     }
 
     return offsets;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    long temp;
+    temp = Double.doubleToLongBits(varianceLowerBound);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    temp = Double.doubleToLongBits(weightOfVariance);
+    result = prime * result + (int) (temp ^ (temp >>> 32));
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    MinVarAndIdleShifter other = (MinVarAndIdleShifter) obj;
+    if (Double.doubleToLongBits(varianceLowerBound) != Double
+        .doubleToLongBits(other.varianceLowerBound))
+      return false;
+    if (Double.doubleToLongBits(weightOfVariance) != Double
+        .doubleToLongBits(other.weightOfVariance))
+      return false;
+    return true;
   }
 }

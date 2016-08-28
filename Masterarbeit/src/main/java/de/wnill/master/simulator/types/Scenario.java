@@ -9,6 +9,7 @@ import de.wnill.master.core.scheduling.SchedulingAlgorithm;
 import de.wnill.master.core.scheduling.second.SecondPassProcessor;
 import de.wnill.master.core.valuation.Valuator;
 import de.wnill.master.core.wdp.WinnerDeterminationAlgorithm;
+import de.wnill.master.simulator.Constraints;
 
 public class Scenario {
 
@@ -350,11 +351,12 @@ public class Scenario {
         + ", truckCount=" + truckCount + ", roundtripTime=" + roundtripTime
         + ", offloadingDuration=" + offloadingDuration + ", schedulingAlgorithm="
         + schedulingAlgorithm + ", secondPassProcessor=" + secondPassProcessor + ", bidGenerator="
-        + bidGenerator + ", truckBreaksDue=" + truckBreaksDue + ", truckBreakDurations="
-        + truckBreakDurations + ", firstDockingTime=" + firstDockingTime
-        + ", optimalDeliveryInterval=" + optimalDeliveryInterval + ", orderAheadMinimum="
-        + orderAheadMinimum + ", orderAheadMaximum=" + orderAheadMaximum + ", valuator=" + valuator
-        + ", winnerDeterminationAlgorithm=" + winnerDeterminationAlgorithm + "]";
+        + bidGenerator + ", truckBreaksDue=" + Constraints.getTruckPauseAfter()
+        + ", truckBreakDurations=" + Constraints.getTruckPauseDuration() + ", firstDockingTime="
+        + firstDockingTime + ", optimalDeliveryInterval=" + optimalDeliveryInterval
+        + ", orderAheadMinimum=" + orderAheadMinimum + ", orderAheadMaximum=" + orderAheadMaximum
+        + ", valuator=" + valuator + ", winnerDeterminationAlgorithm="
+        + winnerDeterminationAlgorithm + "]";
   }
 
   /*

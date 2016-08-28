@@ -48,41 +48,63 @@ public class Simulator {
 
     // Configure a scenario
     // Scenario scenario = new Scenario();
-    // scenario.setEndTime(LocalTime.of(23, 59));
+    // scenario.setStartTime(LocalTime.of(0, 0));
+    // scenario.setEndTime(LocalTime.of(12, 0));
     // scenario.setFirstDockingTime(LocalTime.of(8, 0));
     // scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(27));
-    // scenario.setOrderAheadMaximum(12);
-    // scenario.setOrderAheadMinimum(6);
+    // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(38));
+    // scenario.setOrderAheadMaximum(14);
+    // scenario.setOrderAheadMinimum(4);
     // scenario.setOrderType(OrderType.BUNDLE);
-    // scenario.setRoundtripTime(Duration.ofMinutes(145));
+    // scenario.setRoundtripTime(Duration.ofMinutes(19));
     // scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     // scenario.setStartTime(LocalTime.of(0, 0));
-    // scenario.setTruckCount(2);
-    // scenario.setTruckBreaksDue(new ArrayList<>());
-    // scenario.setTruckBreakDurations(new ArrayList<>());
+    // scenario.setTruckCount(3);
+    // Constraints.setTruckPauseAfter(Duration.ofMinutes(153));
+    // Constraints.setTruckPauseDuration(Duration.ofMinutes(39));
     // scenario.setValuator(new NonMonotonicLatenessValuation());
-    // scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
-    // scenario.setSecondPassProcessor(new NoBreaksScheduleShifter());
+    // scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
+    // scenario.setSecondPassProcessor(new MinVarAndIdleShifter());
+    // scenario.setBidGenerator(new FullScheduleGenerator());
 
     Scenario scenario = new Scenario();
-    scenario.setEndTime(LocalTime.of(10, 0));
+    scenario.setStartTime(LocalTime.of(0, 0));
+    scenario.setEndTime(LocalTime.of(12, 0));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(30));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(38));
     scenario.setOrderAheadMaximum(14);
-    scenario.setOrderAheadMinimum(5);
+    scenario.setOrderAheadMinimum(4);
     scenario.setOrderType(OrderType.BUNDLE);
-    scenario.setRoundtripTime(Duration.ofMinutes(50));
+    scenario.setRoundtripTime(Duration.ofMinutes(19));
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setTruckCount(2);
-    Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
-    Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
+    scenario.setTruckCount(3);
+    Constraints.setTruckPauseAfter(Duration.ofMinutes(153));
+    Constraints.setTruckPauseDuration(Duration.ofMinutes(39));
     scenario.setValuator(new NonMonotonicLatenessValuation());
     scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
     scenario.setSecondPassProcessor(new MinVarAndIdleShifter());
     scenario.setBidGenerator(new FullScheduleGenerator());
+
+    // Scenario scenario = new Scenario();
+    // scenario.setEndTime(LocalTime.of(10, 0));
+    // scenario.setFirstDockingTime(LocalTime.of(8, 0));
+    // scenario.setOffloadingDuration(Duration.ofMinutes(10));
+    // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(30));
+    // scenario.setOrderAheadMaximum(14);
+    // scenario.setOrderAheadMinimum(5);
+    // scenario.setOrderType(OrderType.BUNDLE);
+    // scenario.setRoundtripTime(Duration.ofMinutes(50));
+    // scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
+    // scenario.setStartTime(LocalTime.of(0, 0));
+    // scenario.setTruckCount(2);
+    // Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
+    // Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
+    // scenario.setValuator(new NonMonotonicLatenessValuation());
+    // scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
+    // scenario.setSecondPassProcessor(new MinVarAndIdleShifter());
+    // scenario.setBidGenerator(new FullScheduleGenerator());
 
 
     Engine engine = new Engine(new Condition() {

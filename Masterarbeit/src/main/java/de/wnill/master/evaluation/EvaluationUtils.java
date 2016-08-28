@@ -11,6 +11,11 @@ import de.wnill.master.simulator.utils.JobStartTimeComparator;
 public class EvaluationUtils {
 
   public static double calculateMeanDelivery(LinkedList<Job> deliveries) {
+
+    if (deliveries.isEmpty() || deliveries.size() < 2) {
+      return 0;
+    }
+
     double meanInterval =
         Duration.between(deliveries.getFirst().getScheduledEnd(),
             deliveries.getLast().getScheduledEnd()).toMinutes();

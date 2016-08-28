@@ -222,4 +222,54 @@ public class SimpleTreeSearch implements WinnerDeterminationAlgorithm {
       }
     }
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((bestBidset == null) ? 0 : bestBidset.hashCode());
+    result = prime * result + (int) (bestValuation ^ (bestValuation >>> 32));
+    result = prime * result + ((deliveryIds == null) ? 0 : deliveryIds.hashCode());
+    result = prime * result + ((searchTree == null) ? 0 : searchTree.hashCode());
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    SimpleTreeSearch other = (SimpleTreeSearch) obj;
+    if (bestBidset == null) {
+      if (other.bestBidset != null)
+        return false;
+    } else if (!bestBidset.equals(other.bestBidset))
+      return false;
+    if (bestValuation != other.bestValuation)
+      return false;
+    if (deliveryIds == null) {
+      if (other.deliveryIds != null)
+        return false;
+    } else if (!deliveryIds.equals(other.deliveryIds))
+      return false;
+    if (searchTree == null) {
+      if (other.searchTree != null)
+        return false;
+    } else if (!searchTree.equals(other.searchTree))
+      return false;
+    return true;
+  }
 }

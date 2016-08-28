@@ -149,4 +149,77 @@ public class TreeNode {
         + deliveryIds + ", valuation=" + valuation + ", truckId=" + truckId + ", valid=" + valid
         + ", expected=" + expected + ", proposed=" + proposed + "]";
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + bidId;
+    result = prime * result + ((deliveryIds == null) ? 0 : deliveryIds.hashCode());
+    result = prime * result + ((expected == null) ? 0 : expected.hashCode());
+    result = prime * result + id;
+    result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+    result = prime * result + ((proposed == null) ? 0 : proposed.hashCode());
+    result = prime * result + truckId;
+    result = prime * result + (valid ? 1231 : 1237);
+    result = prime * result + (int) (valuation ^ (valuation >>> 32));
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    TreeNode other = (TreeNode) obj;
+    if (bidId != other.bidId)
+      return false;
+    if (children == null) {
+      if (other.children != null)
+        return false;
+    } else if (!children.equals(other.children))
+      return false;
+    if (deliveryIds == null) {
+      if (other.deliveryIds != null)
+        return false;
+    } else if (!deliveryIds.equals(other.deliveryIds))
+      return false;
+    if (expected == null) {
+      if (other.expected != null)
+        return false;
+    } else if (!expected.equals(other.expected))
+      return false;
+    if (id != other.id)
+      return false;
+    if (parent == null) {
+      if (other.parent != null)
+        return false;
+    } else if (!parent.equals(other.parent))
+      return false;
+    if (proposed == null) {
+      if (other.proposed != null)
+        return false;
+    } else if (!proposed.equals(other.proposed))
+      return false;
+    if (truckId != other.truckId)
+      return false;
+    if (valid != other.valid)
+      return false;
+    if (valuation != other.valuation)
+      return false;
+    return true;
+  }
 }

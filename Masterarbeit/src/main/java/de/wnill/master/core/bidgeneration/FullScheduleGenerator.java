@@ -34,7 +34,6 @@ public class FullScheduleGenerator implements BidGenerator {
       breakDue = truck.getLastBreak().plus(Constraints.getTruckPauseAfter());
     }
 
-    // Create one bid
     LinkedList<Delivery> deliveries = new LinkedList<>();
     List<Job> unprodJob = new LinkedList<>();
     LocalTime nextStart = earliestStart;
@@ -45,7 +44,7 @@ public class FullScheduleGenerator implements BidGenerator {
     // }
     int counter = 1;
 
-    // first job is always a delivery
+    // add jobs until the end of delivery time frame
     while (nextStart.plus(truck.getRoundtripTime()).isBefore(endTime)) {
 
       if (nextStart.plus(Constraints.getTruckPauseDuration())

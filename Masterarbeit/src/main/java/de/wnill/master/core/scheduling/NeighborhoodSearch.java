@@ -362,4 +362,45 @@ public class NeighborhoodSearch implements SchedulingAlgorithm {
           + "]";
     }
   }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((earliestStart == null) ? 0 : earliestStart.hashCode());
+    result = prime * result + ((latestComplete == null) ? 0 : latestComplete.hashCode());
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    NeighborhoodSearch other = (NeighborhoodSearch) obj;
+    if (earliestStart == null) {
+      if (other.earliestStart != null)
+        return false;
+    } else if (!earliestStart.equals(other.earliestStart))
+      return false;
+    if (latestComplete == null) {
+      if (other.latestComplete != null)
+        return false;
+    } else if (!latestComplete.equals(other.latestComplete))
+      return false;
+    return true;
+  }
 }
