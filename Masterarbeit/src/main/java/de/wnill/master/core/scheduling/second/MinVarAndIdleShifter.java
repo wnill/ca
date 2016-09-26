@@ -22,14 +22,14 @@ import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
 public class MinVarAndIdleShifter implements SecondPassProcessor {
 
-  private double weightOfVariance = 1;
+  private double weightOfVariance = 0.8;
 
-  private double varianceLowerBound = 0;
+  private int varianceLowerBound = 20;
 
   public MinVarAndIdleShifter() {}
 
   public MinVarAndIdleShifter(double varianceLowerBound) {
-    this.varianceLowerBound = varianceLowerBound;
+    this.varianceLowerBound = (int) varianceLowerBound;
   }
 
 
@@ -116,14 +116,14 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     // for (Bid bid : bids) {
     // linear.add(3.9, "d" + (deliveries.indexOf(bid.getDeliveries().get(0))));
     // }
-    // linear.add(1 - weightOfVariance, "d5");
-    // linear.add(-(1 - weightOfVariance), "d1");
-    // linear.add(1 - weightOfVariance, "d4");
-    // linear.add(-(1 - weightOfVariance), "d0");
+    linear.add(1 - weightOfVariance, "d5");
+    linear.add(-(1 - weightOfVariance), "d1");
+    linear.add(1 - weightOfVariance, "d4");
+    linear.add(-(1 - weightOfVariance), "d0");
     problem.setObjective(linear, OptType.MIN);
 
     linear = new Linear();
-    for (int i = 1; i <= deliveriesToConsider; i++) {
+    for (int i = 1; i <= totalDeliveries; i++) {
       linear.add(1, "C" + i);
     }
     problem.add(linear, ">=", varianceLowerBound);

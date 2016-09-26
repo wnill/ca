@@ -103,7 +103,8 @@ public class Paver {
         bids.addAll(truck.makeBids(requests, earliest, scenario.getEndTime(),
             scenario.getBidGenerator()));
       } else {
-        bids.addAll(truck.makeBids(requests.getFirst(), earliest, scenario.getEndTime()));
+        // bids.addAll(truck.makeBids(requests.getFirst(), earliest, scenario.getEndTime()));
+        bids.addAll(truck.makeBids(requests, earliest, scenario.getEndTime(), null));
       }
       logger.debug(bids.toString());
     }

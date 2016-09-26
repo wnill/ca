@@ -34,19 +34,19 @@ public class StructuredDominantScenarioGenerator {
 
   private final String SIM_LOG_PATH = "sim/sim_results.csv";
 
-  private int TRUCK_COUNT = 4;
+  private int TRUCK_COUNT = 2;
 
-  private int DELIVERIES = 20;
+  private int DELIVERIES = 5;
 
-  private int DELIVERY_DURATION = 30;
+  private int DELIVERY_DURATION = 50;
 
-  private int TARGET_INTERVAL = 5;
+  private int TARGET_INTERVAL = 30;
 
-  private int PAUSE_INTERVAL = 180;
+  private int PAUSE_INTERVAL = 120;
 
-  private int PAUSE_DURATION = 30;
+  private int PAUSE_DURATION = 15;
 
-  private int MAX_PI = 10000;
+  private int MAX_PI = 100;
 
   // private ResultsCollector collector = new ResultsCollector();
 
@@ -63,7 +63,7 @@ public class StructuredDominantScenarioGenerator {
     // for (int i = 0; i <= MAX_PI; i++) {
     Scenario scenario = new Scenario();
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setEndTime(LocalTime.of(15, 00));
+    scenario.setEndTime(LocalTime.of(18, 00));
     scenario.setFirstDockingTime(LocalTime.of(8, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
 
