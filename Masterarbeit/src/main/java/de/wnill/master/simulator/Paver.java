@@ -99,8 +99,12 @@ public class Paver {
               .isAfter(scenario.getFirstDockingTime().minus(scenario.getRoundtripTime())) ? Clock
               .getInstance().getCurrentTime() : scenario.getFirstDockingTime().minus(
               scenario.getRoundtripTime());
-      bids.addAll(truck.makeBids(requests, earliest, scenario.getEndTime(),
-          scenario.getBidGenerator()));
+      if (scenario.getOrderType().equals(OrderType.BUNDLE)) {
+        bids.addAll(truck.makeBids(requests, earliest, scenario.getEndTime(),
+            scenario.getBidGenerator()));
+      } else {
+        bids.addAll(truck.makeBids(requests.getFirst(), earliest, scenario.getEndTime()));
+      }
       logger.debug(bids.toString());
     }
 

@@ -34,7 +34,8 @@ public class EveryOneIsAWinner implements WinnerDeterminationAlgorithm {
       Iterator<Job> it = bid.getUnproductiveJobs().iterator();
       while (it.hasNext()) {
         Job job = it.next();
-        if (job.getScheduledStart().isAfter(bid.getDeliveries().getLast().getProposedTime())) {
+        if (bid.getDeliveries().size() > 0
+            && job.getScheduledStart().isAfter(bid.getDeliveries().getLast().getProposedTime())) {
           it.remove();
         }
       }

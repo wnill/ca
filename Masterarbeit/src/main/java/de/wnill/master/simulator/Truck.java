@@ -94,7 +94,88 @@ public class Truck {
     }
   }
 
+  /**
+   * Creates bids for sequential allocation
+   * 
+   * @param delivery
+   * @param earliestStart
+   * @param latestComplete
+   * @return
+   */
+  public List<Bid> makeBids(final Delivery delivery, LocalTime earliestStart,
+      LocalTime latestComplete) {
 
+
+    if (!schedule.isEmpty()
+        && schedule.get(schedule.size() - 1).getScheduledEnd().isAfter(earliestStart)) {
+      earliestStart = schedule.get(schedule.size() - 1).getScheduledEnd();
+    }
+
+    if (lastBreak.equals(LocalTime.MIN)) {
+      lastBreak = earliestStart;
+    }
+
+    Job delJob = new Job(delivery, delivery.getRequestedTime(), roundtripTime);
+    Job breakJob = null;
+
+    LocalTime breakStartDue =
+        lastBreak.plus(Constraints.getTruckPauseAfter()).minus(Constraints.getTruckPauseDuration());
+
+    // First case: Delivery can be scheduled optimally
+    if (breakStartDue.isAfter(delivery.getRequestedTime())) {
+
+      LocalTime begin = earliestStart;
+      if (delivery.getRequestedTime().minus(roundtripTime).isAfter(earliestStart)) {
+        begin = delivery.getRequestedTime().minus(roundtripTime);
+      }
+
+      delJob.setScheduledStart(begin);
+
+      // Second case: Delivery cannot be done before break is due; schedule break first
+    } else {
+
+      // MAX (LastScheduledJob; requestedTime - roundtrip - breakDuration
+
+      LocalTime breakBegin =
+          delivery.getRequestedTime().minus(roundtripTime)
+              .minus(Constraints.getTruckPauseDuration());
+      if (!schedule.isEmpty()
+          && schedule.get(schedule.size() - 1).getScheduledEnd().isAfter(breakBegin)) {
+        breakBegin = schedule.get(schedule.size() - 1).getScheduledEnd();
+      }
+
+
+      breakJob =
+          new Job(breakBegin, breakStartDue.plus(Constraints.getTruckPauseDuration()),
+              Constraints.getTruckPauseDuration());
+      delJob.setScheduledStart(breakJob.getScheduledEnd());
+
+      // If delivery can still arrive on time, reschedule it
+      if (delJob.getScheduledEnd().isBefore(delivery.getRequestedTime())) {
+        delJob.setScheduledStart(delivery.getRequestedTime().minus(roundtripTime));
+      }
+    }
+
+    LinkedList<Job> unproductiveJobs = new LinkedList<>();
+    LinkedList<Delivery> deliveries = new LinkedList<>();
+    if (breakJob != null)
+      unproductiveJobs.add(breakJob);
+
+    Delivery newDel = new Delivery(delivery.getId(), delivery.getRequestedTime());
+    newDel.setStartTime(delJob.getScheduledStart());
+    newDel.setProposedTime(delJob.getScheduledEnd());
+
+    long valuation =
+        Duration.between(newDel.getRequestedTime(), newDel.getProposedTime()).abs().toMinutes();
+
+    deliveries.add(newDel);
+    List<Bid> bids = new LinkedList<>();
+    bids.add(new Bid(deliveries, unproductiveJobs, this, valuation));
+
+    return bids;
+  }
+
+  @Deprecated
   /**
    * ATTENTION: Is now only used for sequential bids!
    * 

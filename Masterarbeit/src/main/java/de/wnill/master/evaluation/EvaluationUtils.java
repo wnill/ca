@@ -34,6 +34,12 @@ public class EvaluationUtils {
     return variance;
   }
 
+  public static double calculateStdDev(double meanInterval, List<Job> deliveries) {
+
+    return Math.sqrt(calculateVariance(meanInterval, deliveries));
+  }
+
+
 
   public static LinkedList<Job> unionSchedules(List<List<Job>> completeSchedule) {
     // filter only deliveries
@@ -69,5 +75,12 @@ public class EvaluationUtils {
       }
     }
     return idle;
+  }
+
+  public static double calcAvgIdleTimes(List<List<Job>> jobs) {
+    int truckCount = jobs.size();
+    long totalIdleTimes = calculateIdleTimes(jobs);
+
+    return ((double) totalIdleTimes) / truckCount;
   }
 }
