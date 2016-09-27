@@ -10,11 +10,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.wnill.master.core.bidgeneration.FullScheduleGenerator;
 import de.wnill.master.core.scheduling.NeighborhoodSearch;
-import de.wnill.master.core.scheduling.second.MinVarAndIdleShifter;
 import de.wnill.master.core.valuation.NonMonotonicLatenessValuation;
-import de.wnill.master.core.wdp.EveryOneIsAWinner;
+import de.wnill.master.core.wdp.SimpleTreeSearch;
 import de.wnill.master.evaluation.EvaluationUtils;
 import de.wnill.master.simulator.types.Condition;
 import de.wnill.master.simulator.types.Job;
@@ -48,6 +46,25 @@ public class Simulator {
 
     // Configure a scenario
 
+    Scenario scenario = new Scenario();
+    scenario.setStartTime(LocalTime.of(0, 0));
+    scenario.setEndTime(LocalTime.of(10, 0));
+    scenario.setFirstDockingTime(LocalTime.of(8, 0));
+    scenario.setOffloadingDuration(Duration.ofMinutes(10));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(5));
+    scenario.setOrderAheadMaximum(80);
+    scenario.setOrderAheadMinimum(80);
+    scenario.setOrderType(OrderType.SEQUENTIAL);
+    scenario.setRoundtripTime(Duration.ofMinutes(50));
+    scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
+    scenario.setStartTime(LocalTime.of(0, 0));
+    scenario.setTruckCount(20);
+    Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
+    Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
+    scenario.setValuator(new NonMonotonicLatenessValuation());
+    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
+
+
     // Scenario scenario = new Scenario();
     // scenario.setStartTime(LocalTime.of(0, 0));
     // scenario.setEndTime(LocalTime.of(10, 0));
@@ -56,7 +73,7 @@ public class Simulator {
     // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(30));
     // scenario.setOrderAheadMaximum(14);
     // scenario.setOrderAheadMinimum(5);
-    // scenario.setOrderType(OrderType.SEQUENTIAL);
+    // scenario.setOrderType(OrderType.BUNDLE);
     // scenario.setRoundtripTime(Duration.ofMinutes(50));
     // scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
     // scenario.setStartTime(LocalTime.of(0, 0));
@@ -64,28 +81,9 @@ public class Simulator {
     // Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
     // Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
     // scenario.setValuator(new NonMonotonicLatenessValuation());
-    // scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
-
-
-    Scenario scenario = new Scenario();
-    scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setEndTime(LocalTime.of(10, 0));
-    scenario.setFirstDockingTime(LocalTime.of(8, 0));
-    scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(30));
-    scenario.setOrderAheadMaximum(14);
-    scenario.setOrderAheadMinimum(5);
-    scenario.setOrderType(OrderType.BUNDLE);
-    scenario.setRoundtripTime(Duration.ofMinutes(50));
-    scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
-    scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setTruckCount(2);
-    Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
-    Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
-    scenario.setValuator(new NonMonotonicLatenessValuation());
-    scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
-    scenario.setSecondPassProcessor(new MinVarAndIdleShifter());
-    scenario.setBidGenerator(new FullScheduleGenerator());
+    // scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
+    // scenario.setSecondPassProcessor(new MinVarAndIdleShifter());
+    // scenario.setBidGenerator(new FullScheduleGenerator());
 
 
 

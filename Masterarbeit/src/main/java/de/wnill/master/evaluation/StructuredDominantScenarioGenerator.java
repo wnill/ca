@@ -29,24 +29,52 @@ import de.wnill.master.simulator.types.Scenario;
 
 public class StructuredDominantScenarioGenerator {
 
+  private static final int ABORT_AFTER_UNCHANGED_RESULTS = 50;
+
   private static final Logger logger = LoggerFactory
       .getLogger(StructuredDominantScenarioGenerator.class);
 
   private final String SIM_LOG_PATH = "sim/sim_results.csv";
 
-  private int TRUCK_COUNT = 2;
+  private final String SIM_SHORT_LOG_PATH = "sim/sim_short_results.csv";
 
-  private int DELIVERIES = 5;
+  private int TRUCK_MIN = 2;
 
-  private int DELIVERY_DURATION = 50;
+  private int TRUCK_MAX = 2;
 
-  private int TARGET_INTERVAL = 30;
+  private int TRUCK_DELTA = 1;
 
-  private int PAUSE_INTERVAL = 120;
+  private int DELIVERIES_MIN = 5;
 
-  private int PAUSE_DURATION = 15;
+  private int DELIVERIES_MAX = 10;
 
-  private int MAX_PI = 100;
+  private int DELIVERIES_DELTA = 1;
+
+  private int DELIVERY_DUR_MIN = 15;
+
+  private int DELIVERY_DUR_MAX = 150;
+
+  private int DELIVERY_DUR_DELTA = 5;
+
+  private int TARGET_MIN = 5;
+
+  private int TARGET_MAX = 30;
+
+  private int TARGET_DELTA = 5;
+
+  private int PAUSE_INT_MIN = 180;
+
+  private int PAUSE_INT_MAX = 270;
+
+  private int PAUSE_INT_DELTA = 10;
+
+  private int PAUSE_DUR_MIN = 30;
+
+  private int PAUSE_DUR_MAX = 45;
+
+  private int PAUSE_DUR_DELTA = 5;
+
+  private long MAX_PI = 1000;
 
   // private ResultsCollector collector = new ResultsCollector();
 
@@ -60,35 +88,50 @@ public class StructuredDominantScenarioGenerator {
     int strictlyDominated = 0;
     int validRuns = 0;
 
-    // for (int i = 0; i <= MAX_PI; i++) {
     Scenario scenario = new Scenario();
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setEndTime(LocalTime.of(18, 00));
-    scenario.setFirstDockingTime(LocalTime.of(8, 0));
+    scenario.setEndTime(LocalTime.of(24, 00));
+    scenario.setFirstDockingTime(LocalTime.of(3, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
 
+    for (int trucks = TRUCK_MIN; trucks <= TRUCK_MAX; trucks += TRUCK_DELTA) {
+      for (int deliveries = DELIVERIES_MIN; deliveries <= DELIVERIES_MAX; deliveries +=
+          DELIVERIES_DELTA) {
+        for (int duration = DELIVERY_DUR_MIN; duration <= DELIVERY_DUR_MAX; duration +=
+            DELIVERY_DUR_DELTA) {
+          for (int target = TARGET_MIN; target <= TARGET_MAX; target += TARGET_DELTA) {
+            for (int pauseDur = PAUSE_DUR_MIN; pauseDur <= PAUSE_DUR_MAX; pauseDur +=
+                PAUSE_DUR_DELTA) {
+              for (int pauseInt = PAUSE_INT_MIN; pauseInt <= PAUSE_INT_MAX; pauseInt +=
+                  PAUSE_INT_DELTA) {
 
-    Constraints.setTruckPauseAfter(Duration.ofMinutes(PAUSE_INTERVAL));
-    Constraints.setTruckPauseDuration(Duration.ofMinutes(PAUSE_DURATION));
-    scenario.setTruckCount(TRUCK_COUNT);
-    scenario.setOrderAheadMinimum(DELIVERIES);
-    scenario.setOrderAheadMaximum(DELIVERIES);
-    scenario.setRoundtripTime(Duration.ofMinutes(DELIVERY_DURATION));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(TARGET_INTERVAL));
+                Constraints.setTruckPauseAfter(Duration.ofMinutes(pauseInt));
+                Constraints.setTruckPauseDuration(Duration.ofMinutes(pauseDur));
+                scenario.setTruckCount(trucks);
+                scenario.setOrderAheadMinimum(deliveries);
+                scenario.setOrderAheadMaximum(deliveries);
+                scenario.setRoundtripTime(Duration.ofMinutes(duration));
+                scenario.setOptimalDeliveryInterval(Duration.ofMinutes(target));
 
 
-    int result = executeComparingRun(simulator, val, scenario);
+                int result = executeComparingRun(simulator, val, scenario);
 
-    if (result > 0) {
-      weaklyDominated++;
+                if (result > 0) {
+                  weaklyDominated++;
+                }
+                if (result == 2) {
+                  strictlyDominated++;
+                }
+                if (result > -1) {
+                  validRuns++;
+                }
+
+              }
+            }
+          }
+        }
+      }
     }
-    if (result == 2) {
-      strictlyDominated++;
-    }
-    if (result > -1) {
-      validRuns++;
-    }
-    // }
 
     DecimalFormat df = new DecimalFormat("#.00");
     logger.info("Found weakly dominant Schedules in "
@@ -103,26 +146,26 @@ public class StructuredDominantScenarioGenerator {
    * 
    * @param simulator
    * @param val
-   * @param randomScenario
+   * @param scenario
    * @return 1 if schedules improved, 0 if not, -1 if schedule were not improvable (already
    *         perfect).
    */
-  private int executeComparingRun(Simulator simulator, Valuator val, Scenario randomScenario) {
-    randomScenario.setOrderType(OrderType.SEQUENTIAL);
+  private int executeComparingRun(Simulator simulator, Valuator val, Scenario scenario) {
+    scenario.setOrderType(OrderType.SEQUENTIAL);
 
     // TODO remove
-    randomScenario.setValuator(new NonMonotonicLatenessValuation());
-    randomScenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
-    randomScenario.setSecondPassProcessor(null);
-    randomScenario.setBidGenerator(null);
-    randomScenario.setSchedulingAlgorithm(new NeighborhoodSearch());
+    scenario.setValuator(new NonMonotonicLatenessValuation());
+    scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
+    scenario.setSecondPassProcessor(null);
+    scenario.setBidGenerator(null);
+    scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
 
-    simulator.runScenario(randomScenario);
+    simulator.runScenario(scenario);
 
 
     synchronized (simulator) {
       try {
-        while (simulator.getResultMap().get(randomScenario.hashCode()) == null) {
+        while (simulator.getResultMap().get(scenario.hashCode()) == null) {
           simulator.wait();
         }
       } catch (InterruptedException e) {
@@ -131,56 +174,72 @@ public class StructuredDominantScenarioGenerator {
       }
     }
 
-    List<List<Job>> completeSchedule = simulator.getResultMap().remove(randomScenario.hashCode());
+    List<List<Job>> completeSchedule = simulator.getResultMap().remove(scenario.hashCode());
     LinkedList<Job> deliveries = EvaluationUtils.unionSchedules(completeSchedule);
     double seqMeanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
-    // double seqVariance = EvaluationUtils.calculateVariance(seqMeanDelivery, deliveries);
     double seqStdDev = EvaluationUtils.calculateStdDev(seqMeanDelivery, deliveries);
-    long seqIdleTimes = EvaluationUtils.calculateIdleTimes(completeSchedule);
+    double seqIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
 
-    logResult(randomScenario, 0, seqMeanDelivery, seqStdDev,
+    logOneRun(scenario, 0, seqMeanDelivery, seqStdDev,
         EvaluationUtils.calcAvgIdleTimes(completeSchedule));
 
     logger.info("SEQ StdDev: " + seqStdDev + ", Idle: " + seqIdleTimes);
-    // collector.putResult(OrderType.SEQUENTIAL, seqIdleTimes, seqVariance, seqMeanDelivery);
 
     if (seqStdDev == 0 && seqIdleTimes == 0) {
       return -1;
     }
 
-    Scenario randomBundleScenario = randomScenario;
-    randomBundleScenario.setOrderType(OrderType.BUNDLE);
+    Scenario bundleScenario = scenario;
+    bundleScenario.setOrderType(OrderType.BUNDLE);
+
+    int run = 0;
+    double lastStdDev = -1;
+
+    double bestMean = Double.MAX_VALUE;
+    double bestStdDev = Double.MAX_VALUE;
+    double bestAvgIdle = Double.MAX_VALUE;
+    double bestPi = -1;
 
     for (int pi = 0; pi < MAX_PI; pi++) {
 
-      randomBundleScenario.setSchedulingAlgorithm(new NeighborhoodSearch());
-      randomBundleScenario.setBidGenerator(new FullScheduleGenerator());
-      randomBundleScenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
-      randomBundleScenario.setSecondPassProcessor(new MinVarAndIdleShifter(pi));
-      simulator.runScenario(randomBundleScenario);
+      bundleScenario.setSchedulingAlgorithm(new NeighborhoodSearch());
+      bundleScenario.setBidGenerator(new FullScheduleGenerator());
+      bundleScenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
+      bundleScenario.setSecondPassProcessor(new MinVarAndIdleShifter(pi));
+      simulator.runScenario(bundleScenario);
 
       synchronized (simulator) {
         try {
 
-          while (simulator.getResultMap().get(randomBundleScenario.hashCode()) == null) {
+          while (simulator.getResultMap().get(bundleScenario.hashCode()) == null) {
             simulator.wait();
           }
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
 
-      completeSchedule = simulator.getResultMap().remove(randomBundleScenario.hashCode());
+      completeSchedule = simulator.getResultMap().remove(bundleScenario.hashCode());
 
       deliveries = EvaluationUtils.unionSchedules(completeSchedule);
       double bunMeanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
-      // double bundleVariance = EvaluationUtils.calculateVariance(bunMeanDelivery, deliveries);
       double bundleStdDev = EvaluationUtils.calculateStdDev(bunMeanDelivery, deliveries);
-      long bunIdleTimes = EvaluationUtils.calculateIdleTimes(completeSchedule);
-      // collector.putResult(OrderType.BUNDLE, bunIdleTimes, bundleVariance, bunMeanDelivery);
+      double bunIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
 
-      logResult(randomScenario, pi, bunMeanDelivery, bundleStdDev,
+      if (bundleStdDev < bestStdDev || bunIdleTimes < bestAvgIdle) {
+        bestMean = bunMeanDelivery;
+        bestStdDev = bundleStdDev;
+        bestAvgIdle = bunIdleTimes;
+        bestPi = pi;
+      }
+
+      if (bundleStdDev != lastStdDev) {
+        lastStdDev = bundleStdDev;
+        run = pi;
+      }
+
+
+      logOneRun(scenario, pi, bunMeanDelivery, bundleStdDev,
           EvaluationUtils.calcAvgIdleTimes(completeSchedule));
 
 
@@ -191,11 +250,19 @@ public class StructuredDominantScenarioGenerator {
 
       if (bunIdleTimes < seqIdleTimes && bundleStdDev < seqStdDev) {
         logger.info("Dominant Alternative BUN StdDev: " + bundleStdDev + ", Idle: " + bunIdleTimes);
+        findEvenBetterSolution(simulator, scenario, pi, seqMeanDelivery, seqStdDev, seqIdleTimes,
+            bunMeanDelivery, bundleStdDev, bunIdleTimes);
         return 2;
       } else if (bunIdleTimes <= seqIdleTimes && bundleStdDev <= seqStdDev) {
         logger.info("Dominant Alternative BUN StdDev: " + bundleStdDev + ", Idle: " + bunIdleTimes);
+        findEvenBetterSolution(simulator, scenario, pi, seqMeanDelivery, seqStdDev, seqIdleTimes,
+            bunMeanDelivery, bundleStdDev, bunIdleTimes);
         return 1;
-      } else if (bunIdleTimes > seqIdleTimes && bundleStdDev > seqStdDev) {
+        // Abort if result did not change for a lot of iterations
+      } else if (bunIdleTimes > seqIdleTimes && bundleStdDev > seqStdDev
+          || (pi - run) > ABORT_AFTER_UNCHANGED_RESULTS) {
+        logShortResults(bundleScenario, seqMeanDelivery, seqStdDev, seqIdleTimes, pi, bestMean,
+            bestStdDev, bestAvgIdle);
         return 0;
       }
     }
@@ -203,6 +270,84 @@ public class StructuredDominantScenarioGenerator {
     return 0;
   }
 
+
+  private void findEvenBetterSolution(Simulator simulator, Scenario scenario, int pi,
+      double seqMean, double seqStdDev, double seqAvgIdle, double bunMean, double bunStdDev,
+      double bundAvgIdle) {
+
+    double bestStdDev = bunStdDev;
+    double bestIdleTimes = bundAvgIdle;
+    double bestMeanInterval = bunMean;
+    double bestPi = pi;
+
+    for (double i = pi; i >= pi - 1; i = i - 0.1) {
+      scenario.setSecondPassProcessor(new MinVarAndIdleShifter(pi));
+      simulator.runScenario(scenario);
+
+      synchronized (simulator) {
+        try {
+
+          while (simulator.getResultMap().get(scenario.hashCode()) == null) {
+            simulator.wait();
+          }
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+      List<List<Job>> completeSchedule = simulator.getResultMap().remove(scenario.hashCode());
+
+      LinkedList<Job> deliveries = EvaluationUtils.unionSchedules(completeSchedule);
+      double bunMeanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
+      double newStdDev = EvaluationUtils.calculateStdDev(bunMeanDelivery, deliveries);
+      double newIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
+
+      if (newStdDev < bestStdDev && newIdleTimes < bestIdleTimes) {
+        bestStdDev = newStdDev;
+        bestIdleTimes = newIdleTimes;
+        bestPi = i;
+        bestMeanInterval = bunMeanDelivery;
+      }
+    }
+
+    for (double i = pi; i <= pi + 1; i = i + 0.1) {
+      scenario.setSecondPassProcessor(new MinVarAndIdleShifter(pi));
+      simulator.runScenario(scenario);
+
+      synchronized (simulator) {
+        try {
+
+          while (simulator.getResultMap().get(scenario.hashCode()) == null) {
+            simulator.wait();
+          }
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+
+      List<List<Job>> completeSchedule = simulator.getResultMap().remove(scenario.hashCode());
+
+      LinkedList<Job> deliveries = EvaluationUtils.unionSchedules(completeSchedule);
+      double bunMeanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
+      double newStdDev = EvaluationUtils.calculateStdDev(bunMeanDelivery, deliveries);
+      double newIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
+
+      if (newStdDev < bestStdDev && newIdleTimes < bestIdleTimes) {
+        bestStdDev = newStdDev;
+        bestIdleTimes = newIdleTimes;
+        bestPi = i;
+        bestMeanInterval = bunMeanDelivery;
+      }
+    }
+
+    if (bestPi != pi) {
+      logger.info("found an even better solution!");
+      logOneRun(scenario, bestPi, bestMeanInterval, bestStdDev, bestIdleTimes);
+    }
+
+    logShortResults(scenario, seqMean, seqStdDev, seqAvgIdle, bestPi, bestMeanInterval, bestStdDev,
+        bestIdleTimes);
+  }
 
   /**
    * Writes the sim results to disk in a CSV File. Pattern:
@@ -214,7 +359,7 @@ public class StructuredDominantScenarioGenerator {
    * @param completeSchedule
    * @param pi
    */
-  private void logResult(Scenario scenario, int pi, double meanInterval, double stdDev,
+  private void logOneRun(Scenario scenario, double pi, double meanInterval, double stdDev,
       double avgTruckWait) {
 
     File file = new File(SIM_LOG_PATH);
@@ -254,7 +399,55 @@ public class StructuredDominantScenarioGenerator {
     }
   }
 
+  /**
+   * Writes the sim results to disk in a CSV File. Pattern:
+   * 
+   * TRUCK_COUNT, DELIVERIES, DELIVERY_DURATION, TARGET_INTERVAL, PAUSE_INTERVAL, PAUSE_DURATION,
+   * SEQ_MEAN, SEQ_STDDEV, SEQ_AVGIDLE, PI, BUN_MEAN, BUN_STDDEV, BUN_AVGIDLE
+   * 
+   * @param scenario
+   * @param completeSchedule
+   * @param pi
+   */
+  private void logShortResults(Scenario scenario, double seqMean, double seqStdDev,
+      double seqAvgIdle, double pi, double bunMean, double bunStdDev, double bunAvgIdle) {
 
+    File file = new File(SIM_SHORT_LOG_PATH);
+
+    // if file doesnt exists, then create it
+    if (!file.exists()) {
+      try {
+        file.createNewFile();
+
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    try {
+      FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+      BufferedWriter bw = new BufferedWriter(fw);
+
+      StringBuilder sb = new StringBuilder();
+      sb.append(scenario.getTruckCount()).append(",").append(scenario.getOrderAheadMinimum())
+          .append(",").append(scenario.getRoundtripTime().toMinutes()).append(",")
+          .append(scenario.getOptimalDeliveryInterval().toMinutes()).append(",")
+          .append(Constraints.getTruckPauseAfter().toMinutes()).append(",")
+          .append(Constraints.getTruckPauseDuration().toMinutes()).append(",").append(seqMean)
+          .append(",").append(seqStdDev).append(",").append(seqAvgIdle).append(",").append(pi)
+          .append(",").append(bunMean).append(",").append(bunStdDev).append(",").append(bunAvgIdle);
+
+      if (seqStdDev == 0 && seqAvgIdle == 0) {
+        sb.append(",").append("SKIPPED");
+      }
+
+
+      bw.write(sb.append("\n").toString());
+      bw.close();
+
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
 
   public static void main(String[] args) {
     StructuredDominantScenarioGenerator gen = new StructuredDominantScenarioGenerator();
