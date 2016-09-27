@@ -36,21 +36,21 @@ public class StructuredDominantScenarioGenerator {
 
   private final String SIM_LOG_PATH = "sim/sim_results.csv";
 
-  private final String SIM_SHORT_LOG_PATH = "sim/sim_short_results.csv";
+  private final String SIM_SHORT_LOG_PATH = "sim_short_results t6d6-24.csv";
 
-  private int TRUCK_MIN = 2;
+  private int TRUCK_MIN = 6;
 
-  private int TRUCK_MAX = 2;
+  private int TRUCK_MAX = 6;
 
   private int TRUCK_DELTA = 1;
 
-  private int DELIVERIES_MIN = 5;
+  private int DELIVERIES_MIN = 6;
 
-  private int DELIVERIES_MAX = 10;
+  private int DELIVERIES_MAX = 24;
 
-  private int DELIVERIES_DELTA = 1;
+  private int DELIVERIES_DELTA = 2;
 
-  private int DELIVERY_DUR_MIN = 15;
+  private int DELIVERY_DUR_MIN = 30;
 
   private int DELIVERY_DUR_MAX = 150;
 
@@ -76,10 +76,9 @@ public class StructuredDominantScenarioGenerator {
 
   private long MAX_PI = 1000;
 
-  // private ResultsCollector collector = new ResultsCollector();
 
 
-  public void findOptimalDemoScenario() {
+  public void enumerateScenarios() {
     Config.setEnableVisualisation(false);
     Simulator simulator = new Simulator();
     Valuator val = new NonMonotonicLatenessValuation();
@@ -90,7 +89,7 @@ public class StructuredDominantScenarioGenerator {
 
     Scenario scenario = new Scenario();
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setEndTime(LocalTime.of(24, 00));
+    scenario.setEndTime(LocalTime.of(21, 00));
     scenario.setFirstDockingTime(LocalTime.of(3, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
 
@@ -179,9 +178,9 @@ public class StructuredDominantScenarioGenerator {
     double seqMeanDelivery = EvaluationUtils.calculateMeanDelivery(deliveries);
     double seqStdDev = EvaluationUtils.calculateStdDev(seqMeanDelivery, deliveries);
     double seqIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
-
-    logOneRun(scenario, 0, seqMeanDelivery, seqStdDev,
-        EvaluationUtils.calcAvgIdleTimes(completeSchedule));
+    //
+    // logOneRun(scenario, 0, seqMeanDelivery, seqStdDev,
+    // EvaluationUtils.calcAvgIdleTimes(completeSchedule));
 
     logger.info("SEQ StdDev: " + seqStdDev + ", Idle: " + seqIdleTimes);
 
@@ -239,8 +238,8 @@ public class StructuredDominantScenarioGenerator {
       }
 
 
-      logOneRun(scenario, pi, bunMeanDelivery, bundleStdDev,
-          EvaluationUtils.calcAvgIdleTimes(completeSchedule));
+      // logOneRun(scenario, pi, bunMeanDelivery, bundleStdDev,
+      // EvaluationUtils.calcAvgIdleTimes(completeSchedule));
 
 
       if (bunIdleTimes < 0) {
@@ -342,7 +341,7 @@ public class StructuredDominantScenarioGenerator {
 
     if (bestPi != pi) {
       logger.info("found an even better solution!");
-      logOneRun(scenario, bestPi, bestMeanInterval, bestStdDev, bestIdleTimes);
+      // logOneRun(scenario, bestPi, bestMeanInterval, bestStdDev, bestIdleTimes);
     }
 
     logShortResults(scenario, seqMean, seqStdDev, seqAvgIdle, bestPi, bestMeanInterval, bestStdDev,
@@ -451,6 +450,48 @@ public class StructuredDominantScenarioGenerator {
 
   public static void main(String[] args) {
     StructuredDominantScenarioGenerator gen = new StructuredDominantScenarioGenerator();
-    gen.findOptimalDemoScenario();
+    gen.enumerateScenarios();
+  }
+
+  /**
+   * @param tRUCK_MIN the tRUCK_MIN to set
+   */
+  public void setTRUCK_MIN(int tRUCK_MIN) {
+    TRUCK_MIN = tRUCK_MIN;
+  }
+
+  /**
+   * @param tRUCK_MAX the tRUCK_MAX to set
+   */
+  public void setTRUCK_MAX(int tRUCK_MAX) {
+    TRUCK_MAX = tRUCK_MAX;
+  }
+
+  /**
+   * @param tRUCK_DELTA the tRUCK_DELTA to set
+   */
+  public void setTRUCK_DELTA(int tRUCK_DELTA) {
+    TRUCK_DELTA = tRUCK_DELTA;
+  }
+
+  /**
+   * @param dELIVERIES_MIN the dELIVERIES_MIN to set
+   */
+  public void setDELIVERIES_MIN(int dELIVERIES_MIN) {
+    DELIVERIES_MIN = dELIVERIES_MIN;
+  }
+
+  /**
+   * @param dELIVERIES_MAX the dELIVERIES_MAX to set
+   */
+  public void setDELIVERIES_MAX(int dELIVERIES_MAX) {
+    DELIVERIES_MAX = dELIVERIES_MAX;
+  }
+
+  /**
+   * @param dELIVERIES_DELTA the dELIVERIES_DELTA to set
+   */
+  public void setDELIVERIES_DELTA(int dELIVERIES_DELTA) {
+    DELIVERIES_DELTA = dELIVERIES_DELTA;
   }
 }

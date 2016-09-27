@@ -24,7 +24,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
   private double weightOfVariance = 0.8;
 
-  private int varianceLowerBound = 4;
+  private int varianceLowerBound = 51;
 
   public MinVarAndIdleShifter() {}
 
@@ -81,9 +81,11 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     // adjust breaks
     for (Bid bid : bids) {
       for (Job job : bid.getUnproductiveJobs()) {
-        job.setScheduledStart(startTime.plus(
-            Duration.ofMinutes(offsets.get("b" + job.getId() + bid.getId()))).minus(
-            job.getDuration()));
+        if (job.getId() != null) {
+          job.setScheduledStart(startTime.plus(
+              Duration.ofMinutes(offsets.get("b" + bid.getTruck().getId() + job.getId()))).minus(
+              job.getDuration()));
+        }
       }
     }
 
@@ -194,8 +196,13 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
           problem.add(linear, ">=", duration);
         }
 
+        int jobCounter = 0;
+
         // Add breaks
         for (Job job : bid.getUnproductiveJobs()) {
+
+          jobCounter++;
+          job.setId(String.valueOf(jobCounter));
 
           // also, sequence must remain the same -> find out preceeding and/or succeeding delivery
           int firstSuccessor = -1;
@@ -215,7 +222,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
           // Now add duration constraints of job
           if (lastPredecessor > -1) {
             linear = new Linear();
-            linear.add(1, "b" + job.getId() + bid.getId());
+            linear.add(1, "b" + bid.getTruck().getId() + job.getId());
             linear.add(-1, "d" + (deliveries.indexOf(bid.getDeliveries().get(lastPredecessor))));
             problem.add(linear, ">=", job.getDuration().toMinutes());
           }
@@ -226,7 +233,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
                 Duration.between(bid.getDeliveries().get(firstSuccessor).getStartTime(),
                     bid.getDeliveries().get(firstSuccessor).getProposedTime()).toMinutes();
             linear.add(1, "d" + (deliveries.indexOf(bid.getDeliveries().get(firstSuccessor))));
-            linear.add(-1, "b" + job.getId() + bid.getId());
+            linear.add(-1, "b" + bid.getTruck().getId() + job.getId());
             problem.add(linear, ">=", duration);
           }
         }
@@ -250,8 +257,13 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
       for (Bid bid : bids) {
         for (Job job : bid.getUnproductiveJobs()) {
-          offsets.put("b" + job.getId() + bid.getId(),
-              (long) Math.round((double) result.getPrimalValue("b" + job.getId() + bid.getId())));
+
+          if (job.getId() != null) {
+            offsets.put(
+                "b" + bid.getTruck().getId() + job.getId(),
+                (long) Math.round((double) result.getPrimalValue("b" + bid.getTruck().getId()
+                    + job.getId())));
+          }
         }
       }
     }
