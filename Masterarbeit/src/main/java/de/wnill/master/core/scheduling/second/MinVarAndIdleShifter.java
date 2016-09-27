@@ -24,7 +24,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
   private double weightOfVariance = 0.8;
 
-  private int varianceLowerBound = 20;
+  private int varianceLowerBound = 4;
 
   public MinVarAndIdleShifter() {}
 
@@ -123,12 +123,19 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     problem.setObjective(linear, OptType.MIN);
 
     linear = new Linear();
-    for (int i = 1; i <= totalDeliveries; i++) {
+    for (int i = 1; i <= deliveriesToConsider; i++) {
       linear.add(1, "C" + i);
     }
     problem.add(linear, ">=", varianceLowerBound);
 
-
+    //
+    // linear = new Linear();
+    // linear.add(1, "C1");
+    // linear.add(1, "C2");
+    // linear.add(1, "C3");
+    // linear.add(1, "C4");
+    // linear.add(1, "C5");
+    // problem.add(linear, ">=", 5);
 
     // Add constraints
     linear = new Linear();
