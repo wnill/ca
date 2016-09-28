@@ -74,7 +74,7 @@ public class StructuredDominantScenarioGenerator {
 
   private int PAUSE_DUR_DELTA = 5;
 
-  private long MAX_PI = 500;
+  private long MAX_PI = 2;
 
 
 
@@ -268,12 +268,21 @@ public class StructuredDominantScenarioGenerator {
       double bundleStdDev = EvaluationUtils.calculateStdDev(bunMeanDelivery, deliveries);
       double bunIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
 
+      if (bundleStdDev <= 1) {
+        bundleStdDev = 0;
+      }
+
+      if (bunIdleTimes <= 1) {
+        bundleStdDev = 0;
+      }
+
       if (bundleStdDev < bestStdDev && bunIdleTimes < bestAvgIdle) {
         bestMean = bunMeanDelivery;
         bestStdDev = bundleStdDev;
         bestAvgIdle = bunIdleTimes;
         bestPi = pi;
       }
+
 
       if (bundleStdDev != lastStdDev) {
         lastStdDev = bundleStdDev;

@@ -89,7 +89,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
       // Check the result
       LinkedList<Long> sortedOffsets = new LinkedList<>(offsets.values());
       Collections.sort(sortedOffsets);
-      double meanInterval = sortedOffsets.getLast() / sortedOffsets.size();
+      double meanInterval = sortedOffsets.getLast() / (sortedOffsets.size() - 1);
 
       double variance = 0;
       for (int i = 1; i < sortedOffsets.size(); i++) {
@@ -101,9 +101,11 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
         bestVariance = variance;
         bestBids = bids;
       }
-    }
 
-    System.out.println("winner: " + bestBids);
+      if (bestVariance <= 1) {
+        break;
+      }
+    }
 
     return bestBids;
   }
