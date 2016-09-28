@@ -2,10 +2,13 @@ package de.wnill.master.core.scheduling.second;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import net.sf.javailp.Linear;
@@ -37,43 +40,72 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
   public synchronized Set<Bid> updateBids(Set<Bid> originalBids) {
 
     // First, determine which truck begins first - its schedule will remain fixed
-    Set<Bid> bids = new HashSet<>(originalBids);
-    int totalDeliveries = 0;
+    Set<Bid> bidSet = new HashSet<>(originalBids);
 
-    LinkedList<Delivery> deliveries = new LinkedList<>();
-    for (Bid bid : bids) {
-      for (Delivery delivery : bid.getDeliveries()) {
-        totalDeliveries++;
-        deliveries.add(delivery);
-      }
-    }
 
-    Collections.sort(deliveries, new DeliveryProposedTimeComparator());
-    HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries);
+    LinkedList<Bid> bidList = new LinkedList<>(bidSet);
+    HashSet<Bid> bestBids = new HashSet<>();
+    double bestVariance = Double.MAX_VALUE;
 
-    if (offsets.isEmpty()) {
-      return originalBids;
-    }
+    List<List<Bid>> allPermutations = generatePerm(bidList);
 
-    // Adjust delivery times
-    LocalTime startTime = deliveries.getFirst().getProposedTime();
-    for (int i = 0; i < deliveries.size(); i++) {
-      deliveries.get(i).setProposedTime(startTime.plus(Duration.ofMinutes(offsets.get("d" + i))));
-    }
+    for (List<Bid> bidPerm : allPermutations) {
+      int totalDeliveries = 0;
+      LinkedHashSet<Bid> bids = new LinkedHashSet<>(bidPerm);
 
-    // adjust breaks
-    for (Bid bid : bids) {
-      for (Job job : bid.getUnproductiveJobs()) {
-        if (job.getId() != null) {
-          job.setScheduledStart(startTime.plus(
-              Duration.ofMinutes(offsets.get("b" + bid.getTruck().getId() + job.getId()))).minus(
-              job.getDuration()));
+      LinkedList<Delivery> deliveries = new LinkedList<>();
+      for (Bid bid : bids) {
+        for (Delivery delivery : bid.getDeliveries()) {
+          totalDeliveries++;
+          deliveries.add(delivery);
         }
       }
+
+
+      Collections.sort(deliveries, new DeliveryProposedTimeComparator());
+      HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries);
+
+      if (offsets.isEmpty()) {
+        return originalBids;
+      }
+
+      // Adjust delivery times
+      LocalTime startTime = deliveries.getFirst().getProposedTime();
+      for (int i = 0; i < deliveries.size(); i++) {
+        deliveries.get(i).setProposedTime(startTime.plus(Duration.ofMinutes(offsets.get("d" + i))));
+      }
+
+      // adjust breaks
+      for (Bid bid : bids) {
+        for (Job job : bid.getUnproductiveJobs()) {
+          if (job.getId() != null) {
+            job.setScheduledStart(startTime.plus(
+                Duration.ofMinutes(offsets.get("b" + bid.getTruck().getId() + job.getId()))).minus(
+                job.getDuration()));
+          }
+        }
+      }
+
+      // Check the result
+      LinkedList<Long> sortedOffsets = new LinkedList<>(offsets.values());
+      Collections.sort(sortedOffsets);
+      double meanInterval = sortedOffsets.getLast() / sortedOffsets.size();
+
+      double variance = 0;
+      for (int i = 1; i < sortedOffsets.size(); i++) {
+        long interval = sortedOffsets.get(i) - sortedOffsets.get(i - 1);
+        variance += (interval - meanInterval) * (interval - meanInterval);
+      }
+
+      if (variance < bestVariance) {
+        bestVariance = variance;
+        bestBids = bids;
+      }
     }
 
+    System.out.println("winner: " + bestBids);
 
-    return bids;
+    return bestBids;
   }
 
   /**
@@ -247,6 +279,27 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
     return offsets;
   }
+
+  public List<List<Bid>> generatePerm(List<Bid> original) {
+    if (original.size() == 0) {
+      List<List<Bid>> result = new ArrayList<List<Bid>>();
+      result.add(new ArrayList<Bid>());
+      return result;
+    }
+    Bid firstElement = original.remove(0);
+    List<List<Bid>> returnValue = new ArrayList<List<Bid>>();
+    List<List<Bid>> permutations = generatePerm(original);
+    for (List<Bid> smallerPermutated : permutations) {
+      for (int index = 0; index <= smallerPermutated.size(); index++) {
+        List<Bid> temp = new ArrayList<Bid>(smallerPermutated);
+        temp.add(index, firstElement);
+        returnValue.add(temp);
+      }
+    }
+    return returnValue;
+  }
+
+
 
   /*
    * (non-Javadoc)

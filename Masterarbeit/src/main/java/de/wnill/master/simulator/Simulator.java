@@ -70,12 +70,12 @@ public class Simulator {
     Scenario scenario = new Scenario();
 
     scenario.setTruckCount(6);
-    scenario.setOrderAheadMinimum(14);
-    scenario.setRoundtripTime(Duration.ofMinutes(70));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(20));
+    scenario.setOrderAheadMinimum(10);
+    scenario.setRoundtripTime(Duration.ofMinutes(30));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(5));
     Constraints.setTruckPauseAfter(Duration.ofMinutes(180));
     Constraints.setTruckPauseDuration(Duration.ofMinutes(30));
-    scenario.setSecondPassProcessor(new MinVarAndIdleShifter(1));
+    scenario.setSecondPassProcessor(new MinVarAndIdleShifter(0));
 
 
     scenario.setStartTime(LocalTime.of(0, 0));
