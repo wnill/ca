@@ -49,41 +49,44 @@ public class Simulator {
     // Configure a scenario
 
     // Scenario scenario = new Scenario();
+    // scenario.setTruckCount(6);
+    // scenario.setOrderAheadMinimum(14);
+    // scenario.setRoundtripTime(Duration.ofMinutes(105));
+    // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(15));
+    // Constraints.setTruckPauseAfter(Duration.ofMinutes(220));
+    // Constraints.setTruckPauseDuration(Duration.ofMinutes(45));
+    //
     // scenario.setStartTime(LocalTime.of(0, 0));
-    // scenario.setEndTime(LocalTime.of(10, 0));
-    // scenario.setFirstDockingTime(LocalTime.of(8, 0));
+    // scenario.setEndTime(LocalTime.of(21, 0));
+    // scenario.setFirstDockingTime(LocalTime.of(3, 0));
     // scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    // scenario.setOptimalDeliveryInterval(Duration.ofMinutes(5));
-    // scenario.setOrderAheadMaximum(80);
-    // scenario.setOrderAheadMinimum(80);
+    // scenario.setOrderAheadMaximum(scenario.getOrderAheadMinimum());
     // scenario.setOrderType(OrderType.SEQUENTIAL);
-    // scenario.setRoundtripTime(Duration.ofMinutes(50));
     // scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
-    // scenario.setStartTime(LocalTime.of(0, 0));
-    // scenario.setTruckCount(20);
-    // Constraints.setTruckPauseAfter(Duration.ofMinutes(120));
-    // Constraints.setTruckPauseDuration(Duration.ofMinutes(15));
     // scenario.setValuator(new NonMonotonicLatenessValuation());
     // scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
 
 
     Scenario scenario = new Scenario();
+
+    scenario.setTruckCount(6);
+    scenario.setOrderAheadMinimum(14);
+    scenario.setRoundtripTime(Duration.ofMinutes(105));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(15));
+    Constraints.setTruckPauseAfter(Duration.ofMinutes(220));
+    Constraints.setTruckPauseDuration(Duration.ofMinutes(45));
+    scenario.setSecondPassProcessor(new MinVarAndIdleShifter(0));
+
+
     scenario.setStartTime(LocalTime.of(0, 0));
-    scenario.setEndTime(LocalTime.of(23, 0));
+    scenario.setEndTime(LocalTime.of(21, 0));
     scenario.setFirstDockingTime(LocalTime.of(3, 0));
     scenario.setOffloadingDuration(Duration.ofMinutes(10));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(10));
-    scenario.setOrderAheadMaximum(14);
-    scenario.setOrderAheadMinimum(5);
+    scenario.setOrderAheadMaximum(scenario.getOrderAheadMinimum());
     scenario.setOrderType(OrderType.BUNDLE);
-    scenario.setRoundtripTime(Duration.ofMinutes(135));
     scenario.setSchedulingAlgorithm(new NeighborhoodSearch());
-    scenario.setTruckCount(2);
-    Constraints.setTruckPauseAfter(Duration.ofMinutes(210));
-    Constraints.setTruckPauseDuration(Duration.ofMinutes(40));
     scenario.setValuator(new NonMonotonicLatenessValuation());
     scenario.setWinnerDeterminationAlgorithm(new EveryOneIsAWinner());
-    scenario.setSecondPassProcessor(new MinVarAndIdleShifter(10));
     scenario.setBidGenerator(new FullScheduleGenerator());
 
 
@@ -110,15 +113,14 @@ public class Simulator {
     }
 
     LinkedList<Job> schedule = EvaluationUtils.unionSchedules(schedules);
+    double mean = EvaluationUtils.calculateMeanDelivery(schedule);
     logger.info("-----------------------------------------------");
-    logger.info("CompTimeVar: "
-        + EvaluationUtils.calculateVariance(EvaluationUtils.calculateMeanDelivery(schedule),
-            schedule));
-    logger.info("IdleTimes: " + EvaluationUtils.calculateIdleTimes(schedules));
+    logger.info("Mean: " + mean);
+    logger.info("StdDev: " + EvaluationUtils.calculateStdDev(mean, schedule));
+    logger.info("AvgIdleTimes: " + EvaluationUtils.calcAvgIdleTimes(schedules));
     logger.info("Scenario: " + scenario);
     logger.info("-----------------------------------------------");
   }
-
 
   /**
    * @return the resultMap

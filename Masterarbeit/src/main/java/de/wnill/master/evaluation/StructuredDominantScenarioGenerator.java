@@ -36,7 +36,7 @@ public class StructuredDominantScenarioGenerator {
 
   private final String SIM_LOG_PATH = "sim/sim_results.csv";
 
-  private final String SIM_SHORT_LOG_PATH = "sim_short_results t6d6-24.csv";
+  private final String SIM_SHORT_LOG_PATH = "sim_short_results.csv";
 
   private int TRUCK_MIN = 6;
 
@@ -77,7 +77,6 @@ public class StructuredDominantScenarioGenerator {
   private long MAX_PI = 1000;
 
 
-
   public void enumerateScenarios() {
     Config.setEnableVisualisation(false);
     Simulator simulator = new Simulator();
@@ -111,6 +110,11 @@ public class StructuredDominantScenarioGenerator {
                 scenario.setOrderAheadMaximum(deliveries);
                 scenario.setRoundtripTime(Duration.ofMinutes(duration));
                 scenario.setOptimalDeliveryInterval(Duration.ofMinutes(target));
+
+                // prevent invalid parameter combination
+                if (pauseInt < duration + pauseDur) {
+                  continue;
+                }
 
 
                 int result = executeComparingRun(simulator, val, scenario);
@@ -152,7 +156,6 @@ public class StructuredDominantScenarioGenerator {
   private int executeComparingRun(Simulator simulator, Valuator val, Scenario scenario) {
     scenario.setOrderType(OrderType.SEQUENTIAL);
 
-    // TODO remove
     scenario.setValuator(new NonMonotonicLatenessValuation());
     scenario.setWinnerDeterminationAlgorithm(new SimpleTreeSearch());
     scenario.setSecondPassProcessor(null);
@@ -168,7 +171,6 @@ public class StructuredDominantScenarioGenerator {
           simulator.wait();
         }
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
         e.printStackTrace();
       }
     }
@@ -184,9 +186,9 @@ public class StructuredDominantScenarioGenerator {
 
     logger.info("SEQ StdDev: " + seqStdDev + ", Idle: " + seqIdleTimes);
 
-    if (seqStdDev == 0 && seqIdleTimes == 0) {
-      return -1;
-    }
+    // if (seqStdDev == 0 && seqIdleTimes == 0) {
+    // return -1;
+    // }
 
     Scenario bundleScenario = scenario;
     bundleScenario.setOrderType(OrderType.BUNDLE);
@@ -225,7 +227,7 @@ public class StructuredDominantScenarioGenerator {
       double bundleStdDev = EvaluationUtils.calculateStdDev(bunMeanDelivery, deliveries);
       double bunIdleTimes = EvaluationUtils.calcAvgIdleTimes(completeSchedule);
 
-      if (bundleStdDev < bestStdDev || bunIdleTimes < bestAvgIdle) {
+      if (bundleStdDev < bestStdDev && bunIdleTimes < bestAvgIdle) {
         bestMean = bunMeanDelivery;
         bestStdDev = bundleStdDev;
         bestAvgIdle = bunIdleTimes;
@@ -242,7 +244,7 @@ public class StructuredDominantScenarioGenerator {
       // EvaluationUtils.calcAvgIdleTimes(completeSchedule));
 
 
-      if (bunIdleTimes < 0) {
+      if (bunIdleTimes < 0 || seqIdleTimes < 0) {
         logger.warn("invalid schedule: " + completeSchedule);
         continue;
       }
@@ -260,7 +262,9 @@ public class StructuredDominantScenarioGenerator {
         // Abort if result did not change for a lot of iterations
       } else if (bunIdleTimes > seqIdleTimes && bundleStdDev > seqStdDev
           || (pi - run) > ABORT_AFTER_UNCHANGED_RESULTS) {
-        logShortResults(bundleScenario, seqMeanDelivery, seqStdDev, seqIdleTimes, pi, bestMean,
+
+
+        logShortResults(bundleScenario, seqMeanDelivery, seqStdDev, seqIdleTimes, bestPi, bestMean,
             bestStdDev, bestAvgIdle);
         return 0;
       }
@@ -411,7 +415,7 @@ public class StructuredDominantScenarioGenerator {
   private void logShortResults(Scenario scenario, double seqMean, double seqStdDev,
       double seqAvgIdle, double pi, double bunMean, double bunStdDev, double bunAvgIdle) {
 
-    File file = new File(SIM_SHORT_LOG_PATH);
+    File file = new File(SIM_SHORT_LOG_PATH + "t" + scenario.getTruckCount());
 
     // if file doesnt exists, then create it
     if (!file.exists()) {

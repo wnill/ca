@@ -156,7 +156,7 @@ public class Paver {
         if (bid != null) {
           bid.getTruck().awardBid(bid);
           winningTrucks.add(bid.getTruck());
-          logger.info("Awarded truck " + bid.getTruck().getId() + " with bid " + bid);
+          logger.debug("Awarded truck " + bid.getTruck().getId() + " with bid " + bid);
         }
       }
     }

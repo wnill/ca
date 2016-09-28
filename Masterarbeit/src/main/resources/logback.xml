@@ -9,6 +9,20 @@
   
   <logger name="de.wnill.master" level="INFO"/>
 
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+	  <filter class="ch.qos.logback.classic.filter.LevelFilter">
+         <level>ERROR</level>
+         <onMatch>ACCEPT</onMatch>
+         <onMismatch>DENY</onMismatch>
+      </filter>
+      <file>errorLog.txt </file>
+      <append>true</append>
+      <encoder>
+         <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+      </encoder>
+   </appender>
+
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
