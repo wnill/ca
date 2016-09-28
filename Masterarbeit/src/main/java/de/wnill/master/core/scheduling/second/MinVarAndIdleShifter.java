@@ -24,7 +24,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
   private double weightOfVariance = 1;
 
-  private int varianceLowerBound = 100000;
+  private int varianceLowerBound = 0;
 
   public MinVarAndIdleShifter() {}
 
@@ -157,14 +157,9 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     }
 
 
-    System.out.println(deliveries);
-
     // add constraints to fix the duration of each delivery
     for (Bid bid : bids) {
       synchronized (bid) {
-
-        System.out.println(bid);
-
 
         for (int i = 1; i < bid.getDeliveries().size(); i++) {
           long duration =
@@ -222,17 +217,12 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
     SolverFactory factory = new SolverFactoryLpSolve();
 
-    System.out.println(problem);
-
-
     factory.setParameter(Solver.VERBOSE, 0);
     factory.setParameter(Solver.TIMEOUT, 100); // set timeout to 100 seconds
 
     Solver solver = factory.get();
     Result result = solver.solve(problem);
 
-
-    System.out.println(result);
 
     HashMap<String, Long> offsets = new HashMap<>();
     if (result != null) {
