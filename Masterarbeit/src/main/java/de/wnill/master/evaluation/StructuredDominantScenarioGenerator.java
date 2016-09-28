@@ -38,43 +38,84 @@ public class StructuredDominantScenarioGenerator {
 
   private final String SIM_SHORT_LOG_PATH = "sim_short_results.csv";
 
+  // private int TRUCK_MIN = 6;
+  //
+  // private int TRUCK_MAX = 6;
+  //
+  // private int TRUCK_DELTA = 1;
+  //
+  // private int DELIVERIES_MIN = 10;
+  //
+  // private int DELIVERIES_MAX = 24;
+  //
+  // private int DELIVERIES_DELTA = 4;
+  //
+  // private int DELIVERY_DUR_MIN = 30;
+  //
+  // private int DELIVERY_DUR_MAX = 150;
+  //
+  // private int DELIVERY_DUR_DELTA = 10;
+  //
+  // private int TARGET_MIN = 5;
+  //
+  // private int TARGET_MAX = 20;
+  //
+  // private int TARGET_DELTA = 5;
+  //
+  // private int PAUSE_INT_MIN = 180;
+  //
+  // private int PAUSE_INT_MAX = 270;
+  //
+  // private int PAUSE_INT_DELTA = 30;
+  //
+  // private int PAUSE_DUR_MIN = 30;
+  //
+  // private int PAUSE_DUR_MAX = 45;
+  //
+  // private int PAUSE_DUR_DELTA = 5;
+  //
+  // private long MAX_PI = 500;
+
+
+
   private int TRUCK_MIN = 6;
 
   private int TRUCK_MAX = 6;
 
   private int TRUCK_DELTA = 1;
 
-  private int DELIVERIES_MIN = 6;
+  private int DELIVERIES_MIN = 22;
 
-  private int DELIVERIES_MAX = 24;
+  private int DELIVERIES_MAX = 22;
 
-  private int DELIVERIES_DELTA = 2;
+  private int DELIVERIES_DELTA = 4;
 
   private int DELIVERY_DUR_MIN = 30;
 
-  private int DELIVERY_DUR_MAX = 150;
+  private int DELIVERY_DUR_MAX = 30;
 
-  private int DELIVERY_DUR_DELTA = 5;
+  private int DELIVERY_DUR_DELTA = 10;
 
-  private int TARGET_MIN = 5;
+  private int TARGET_MIN = 10;
 
-  private int TARGET_MAX = 30;
+  private int TARGET_MAX = 10;
 
   private int TARGET_DELTA = 5;
 
   private int PAUSE_INT_MIN = 180;
 
-  private int PAUSE_INT_MAX = 270;
+  private int PAUSE_INT_MAX = 180;
 
-  private int PAUSE_INT_DELTA = 10;
+  private int PAUSE_INT_DELTA = 30;
 
-  private int PAUSE_DUR_MIN = 30;
+  private int PAUSE_DUR_MIN = 35;
 
-  private int PAUSE_DUR_MAX = 45;
+  private int PAUSE_DUR_MAX = 35;
 
   private int PAUSE_DUR_DELTA = 5;
 
-  private long MAX_PI = 1000;
+  private long MAX_PI = 500;
+
 
 
   public void enumerateScenarios() {
@@ -261,7 +302,7 @@ public class StructuredDominantScenarioGenerator {
         return 1;
         // Abort if result did not change for a lot of iterations
       } else if (bunIdleTimes > seqIdleTimes && bundleStdDev > seqStdDev
-          || (pi - run) > ABORT_AFTER_UNCHANGED_RESULTS) {
+          && (pi - run) > ABORT_AFTER_UNCHANGED_RESULTS) {
 
 
         logShortResults(bundleScenario, seqMeanDelivery, seqStdDev, seqIdleTimes, bestPi, bestMean,
@@ -269,6 +310,11 @@ public class StructuredDominantScenarioGenerator {
         return 0;
       }
     }
+
+    logShortResults(bundleScenario, seqMeanDelivery, seqStdDev, seqIdleTimes, bestPi, bestMean,
+        bestStdDev, bestAvgIdle);
+    logger.info("Best result: " + bestMean + ", " + bestStdDev + ", " + bestAvgIdle + " - "
+        + bestPi);
 
     return 0;
   }

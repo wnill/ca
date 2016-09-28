@@ -22,9 +22,9 @@ import de.wnill.master.simulator.utils.DeliveryProposedTimeComparator;
 
 public class MinVarAndIdleShifter implements SecondPassProcessor {
 
-  private double weightOfVariance = 0.8;
+  private double weightOfVariance = 1;
 
-  private int varianceLowerBound = 51;
+  private int varianceLowerBound = 100000;
 
   public MinVarAndIdleShifter() {}
 
@@ -34,39 +34,22 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
 
   @Override
-  public Set<Bid> updateBids(Set<Bid> originalBids) {
+  public synchronized Set<Bid> updateBids(Set<Bid> originalBids) {
 
     // First, determine which truck begins first - its schedule will remain fixed
     Set<Bid> bids = new HashSet<>(originalBids);
-    LocalTime firstDelivery = LocalTime.MAX;
-    Bid firstStarterBid = null;
     int totalDeliveries = 0;
 
     LinkedList<Delivery> deliveries = new LinkedList<>();
     for (Bid bid : bids) {
       for (Delivery delivery : bid.getDeliveries()) {
-        if (delivery.getProposedTime().isBefore(firstDelivery)) {
-          firstDelivery = delivery.getProposedTime();
-          firstStarterBid = bid;
-        }
         totalDeliveries++;
         deliveries.add(delivery);
       }
     }
 
-    if (firstStarterBid == null) {
-      return originalBids;
-    }
-
-    // Save a list of all fixed times
-    HashMap<Integer, Long> fixedTimes = new HashMap<>();
-    for (Delivery delivery : firstStarterBid.getDeliveries()) {
-      fixedTimes.put(delivery.getId(), Duration.between(firstDelivery, delivery.getProposedTime())
-          .toMinutes());
-    }
-
     Collections.sort(deliveries, new DeliveryProposedTimeComparator());
-    HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries, fixedTimes);
+    HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries);
 
     if (offsets.isEmpty()) {
       return originalBids;
@@ -89,6 +72,7 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
       }
     }
 
+
     return bids;
   }
 
@@ -102,8 +86,15 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
    * @param fixedTimes
    * @return
    */
-  HashMap<String, Long> solveIlp(Set<Bid> bids, int totalDeliveries,
-      LinkedList<Delivery> deliveries, HashMap<Integer, Long> fixedTimes) {
+  synchronized HashMap<String, Long> solveIlp(Set<Bid> bids, int totalDeliveries,
+      LinkedList<Delivery> deliveriesParam) {
+
+    LinkedList<Delivery> deliveries = new LinkedList<>();
+    for (Delivery delivery : deliveriesParam) {
+      deliveries.add(delivery);
+    }
+
+
     Problem problem = new Problem();
     Linear linear = new Linear();
     // Define objective function
@@ -114,14 +105,10 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
       problem.setVarType("C" + i, Double.class);
     }
 
-    // Minimize idle times
-    // for (Bid bid : bids) {
-    // linear.add(3.9, "d" + (deliveries.indexOf(bid.getDeliveries().get(0))));
-    // }
-    linear.add(1 - weightOfVariance, "d5");
-    linear.add(-(1 - weightOfVariance), "d1");
-    linear.add(1 - weightOfVariance, "d4");
-    linear.add(-(1 - weightOfVariance), "d0");
+    // linear.add(1 - weightOfVariance, "d5");
+    // linear.add(-(1 - weightOfVariance), "d1");
+    // linear.add(1 - weightOfVariance, "d4");
+    // linear.add(-(1 - weightOfVariance), "d0");
     problem.setObjective(linear, OptType.MIN);
 
     linear = new Linear();
@@ -130,14 +117,6 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     }
     problem.add(linear, ">=", varianceLowerBound);
 
-    //
-    // linear = new Linear();
-    // linear.add(1, "C1");
-    // linear.add(1, "C2");
-    // linear.add(1, "C3");
-    // linear.add(1, "C4");
-    // linear.add(1, "C5");
-    // problem.add(linear, ">=", 5);
 
     // Add constraints
     linear = new Linear();
@@ -173,19 +152,20 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
       linear.add(-1, "C" + deliveryCounter);
       problem.add(linear, "<=", 0);
 
-      // all deliveries of the truck which start first are assumed to be fixed
-      // if (fixedTimes.containsKey(delivery.getId())) {
-      // linear = new Linear();
-      // linear.add(1, "d" + deliveryCounter);
-      // problem.add(linear, "=", fixedTimes.get(delivery.getId()));
-      // }
 
       deliveryCounter++;
     }
 
+
+    System.out.println(deliveries);
+
     // add constraints to fix the duration of each delivery
     for (Bid bid : bids) {
-      if (bid.getDeliveries().size() > 1) {
+      synchronized (bid) {
+
+        System.out.println(bid);
+
+
         for (int i = 1; i < bid.getDeliveries().size(); i++) {
           long duration =
               Duration.between(bid.getDeliveries().get(i - 1).getProposedTime(),
@@ -241,11 +221,18 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     }
 
     SolverFactory factory = new SolverFactoryLpSolve();
+
+    System.out.println(problem);
+
+
     factory.setParameter(Solver.VERBOSE, 0);
     factory.setParameter(Solver.TIMEOUT, 100); // set timeout to 100 seconds
 
     Solver solver = factory.get();
     Result result = solver.solve(problem);
+
+
+    System.out.println(result);
 
     HashMap<String, Long> offsets = new HashMap<>();
     if (result != null) {
