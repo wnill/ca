@@ -27,12 +27,12 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
 
   private double weightOfVariance = 1;
 
-  private int varianceLowerBound = 0;
+  private double varianceLowerBound = 0;
 
   public MinVarAndIdleShifter() {}
 
   public MinVarAndIdleShifter(double varianceLowerBound) {
-    this.varianceLowerBound = (int) varianceLowerBound;
+    this.varianceLowerBound = varianceLowerBound;
   }
 
 
@@ -43,69 +43,86 @@ public class MinVarAndIdleShifter implements SecondPassProcessor {
     Set<Bid> bidSet = new HashSet<>(originalBids);
 
 
-    LinkedList<Bid> bidList = new LinkedList<>(bidSet);
+    LinkedList<Bid> rawBidList = new LinkedList<>(bidSet);
     HashSet<Bid> bestBids = new HashSet<>();
-    double bestVariance = Double.MAX_VALUE;
+    // double bestVariance = Double.MAX_VALUE;
 
-    List<List<Bid>> allPermutations = generatePerm(bidList);
+    LinkedList<Bid> sortedBidList = new LinkedList<>();
 
-    for (List<Bid> bidPerm : allPermutations) {
-      int totalDeliveries = 0;
-      LinkedHashSet<Bid> bids = new LinkedHashSet<>(bidPerm);
+    while (!rawBidList.isEmpty()) {
 
-      LinkedList<Delivery> deliveries = new LinkedList<>();
-      for (Bid bid : bids) {
-        for (Delivery delivery : bid.getDeliveries()) {
-          totalDeliveries++;
-          deliveries.add(delivery);
+      int index = -1;
+      int biggest = 0;
+
+      for (Bid bid : rawBidList) {
+        if (bid.getDeliveries().size() > biggest) {
+          biggest = bid.getDeliveries().size();
+          index = rawBidList.indexOf(bid);
         }
       }
 
+      sortedBidList.add(rawBidList.remove(index));
+    }
 
-      Collections.sort(deliveries, new DeliveryProposedTimeComparator());
-      HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries);
 
-      if (offsets.isEmpty()) {
-        return originalBids;
-      }
 
-      // Adjust delivery times
-      LocalTime startTime = deliveries.getFirst().getProposedTime();
-      for (int i = 0; i < deliveries.size(); i++) {
-        deliveries.get(i).setProposedTime(startTime.plus(Duration.ofMinutes(offsets.get("d" + i))));
-      }
+    // for (List<Bid> bidPerm : allPermutations) {
+    int totalDeliveries = 0;
+    LinkedHashSet<Bid> bids = new LinkedHashSet<>(sortedBidList);
 
-      // adjust breaks
-      for (Bid bid : bids) {
-        for (Job job : bid.getUnproductiveJobs()) {
-          if (job.getId() != null) {
-            job.setScheduledStart(startTime.plus(
-                Duration.ofMinutes(offsets.get("b" + bid.getTruck().getId() + job.getId()))).minus(
-                job.getDuration()));
-          }
-        }
-      }
-
-      // Check the result
-      LinkedList<Long> sortedOffsets = new LinkedList<>(offsets.values());
-      Collections.sort(sortedOffsets);
-      double meanInterval = sortedOffsets.getLast() / (sortedOffsets.size() - 1);
-
-      double variance = 0;
-      for (int i = 1; i < sortedOffsets.size(); i++) {
-        long interval = sortedOffsets.get(i) - sortedOffsets.get(i - 1);
-        variance += (interval - meanInterval) * (interval - meanInterval);
-      }
-
-      if (variance < bestVariance) {
-        bestVariance = variance;
-        bestBids = bids;
-      }
-
-      if (bestVariance <= 1) {
-        break;
+    LinkedList<Delivery> deliveries = new LinkedList<>();
+    for (Bid bid : bids) {
+      for (Delivery delivery : bid.getDeliveries()) {
+        totalDeliveries++;
+        deliveries.add(delivery);
       }
     }
+
+
+    Collections.sort(deliveries, new DeliveryProposedTimeComparator());
+    HashMap<String, Long> offsets = solveIlp(bids, totalDeliveries, deliveries);
+
+    if (offsets.isEmpty()) {
+      return originalBids;
+    }
+
+    // Adjust delivery times
+    LocalTime startTime = deliveries.getFirst().getProposedTime();
+    for (int i = 0; i < deliveries.size(); i++) {
+      deliveries.get(i).setProposedTime(startTime.plus(Duration.ofMinutes(offsets.get("d" + i))));
+    }
+
+    // adjust breaks
+    for (Bid bid : bids) {
+      for (Job job : bid.getUnproductiveJobs()) {
+        if (job.getId() != null) {
+          job.setScheduledStart(startTime.plus(
+              Duration.ofMinutes(offsets.get("b" + bid.getTruck().getId() + job.getId()))).minus(
+              job.getDuration()));
+        }
+      }
+    }
+
+    // Check the result
+    // LinkedList<Long> sortedOffsets = new LinkedList<>(offsets.values());
+    // Collections.sort(sortedOffsets);
+    // double meanInterval = sortedOffsets.getLast() / (sortedOffsets.size() - 1);
+    //
+    // double variance = 0;
+    // for (int i = 1; i < sortedOffsets.size(); i++) {
+    // long interval = sortedOffsets.get(i) - sortedOffsets.get(i - 1);
+    // variance += (interval - meanInterval) * (interval - meanInterval);
+    // }
+    //
+    // if (variance < bestVariance) {
+    // bestVariance = variance;
+    bestBids = bids;
+    // }
+    //
+    // if (bestVariance <= 1) {
+    // break;
+    // }
+    // }
 
     return bestBids;
   }

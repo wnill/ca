@@ -70,9 +70,9 @@ public class Simulator {
     Scenario scenario = new Scenario();
 
     scenario.setTruckCount(6);
-    scenario.setOrderAheadMinimum(10);
-    scenario.setRoundtripTime(Duration.ofMinutes(30));
-    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(5));
+    scenario.setOrderAheadMinimum(18);
+    scenario.setRoundtripTime(Duration.ofMinutes(60));
+    scenario.setOptimalDeliveryInterval(Duration.ofMinutes(15));
     Constraints.setTruckPauseAfter(Duration.ofMinutes(180));
     Constraints.setTruckPauseDuration(Duration.ofMinutes(30));
     scenario.setSecondPassProcessor(new MinVarAndIdleShifter(0));
@@ -100,7 +100,11 @@ public class Simulator {
       }
     }, scenario);
     engine.registerResultCallback(new Simulator());
+    long start = System.currentTimeMillis();
     engine.run();
+    long end = System.currentTimeMillis();
+
+    System.out.println("# Duration: " + (end - start) + "ms");
 
   }
 
